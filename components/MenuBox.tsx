@@ -1,10 +1,19 @@
 import React from "react";
 import styled from "styled-components";
 import Link from "next/link";
-
+import { useDispatch, useSelector } from "react-redux";
+import { isLoggedInSelector } from "../utils/selector";
+import * as authAction from "../store/modules/auth";
+import { useRouter } from "next/router";
 function MenuBox() {
-  const isLoggedIn = false;
-  const COMMON_DUMMY = ["도움말"];
+  const router = useRouter();
+  const isLoggedIn = useSelector(isLoggedInSelector);
+  const dispatch = useDispatch();
+
+  const onLogout = () => {
+    dispatch(authAction.logout(""));
+    router.replace("/");
+  };
 
   return (
     <StyledMenuBox>
@@ -20,16 +29,14 @@ function MenuBox() {
           </>
         ) : (
           <>
-            <StyledItem>로그아웃</StyledItem>
+            <StyledItem onClick={onLogout}>로그아웃</StyledItem>
             <Link href="/wishlist">
               <StyledItem>위시리스트</StyledItem>
             </Link>
           </>
         )}
         <StyledLine />
-        {COMMON_DUMMY.map((each, i) => (
-          <StyledItem key={i}>{each}</StyledItem>
-        ))}
+        <StyledItem>도움말</StyledItem>
       </StyledItemsWrapper>
     </StyledMenuBox>
   );

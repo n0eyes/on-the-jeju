@@ -84,18 +84,17 @@ const StyledServiceLink = styled.a`
   margin-top: 2rem;
   width: 15rem;
   height: 5rem;
-  background-color: white;
+  background-color: ${colors.beige};
   border-radius: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.2rem;
   font-weight: bold;
-  color: ${colors.darkblue};
-  cursor: pointer;
+  color: ${colors.black};
   transition: 0.3s;
 
   &:hover {
-    background-color: ${darken(0.03, "white")};
+    background-color: ${darken(0.1, colors.beige)};
   }
 `;

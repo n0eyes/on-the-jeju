@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
 import MenuBox from "./MenuBox";
@@ -25,8 +26,8 @@ function Header() {
   return (
     <StyledHeader>
       <StyledTitleWrapper>
-        <div>로고</div>
-        <div>서비스 명</div>
+        <Link href="/">로고</Link>
+        <Link href="/">서비스 명</Link>
       </StyledTitleWrapper>
       <StyledMenuWrapper>
         <svg
@@ -80,7 +81,7 @@ const StyledHeader = styled.div`
 const StyledTitleWrapper = styled.div`
   display: flex;
 
-  & > div:nth-child(2) {
+  & > a:nth-child(2) {
     padding-left: 1rem;
   }
 `;

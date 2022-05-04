@@ -1,6 +1,8 @@
+import { darken } from "polished";
 import React from "react";
 import styled from "styled-components";
-function login() {
+import { colors } from "../utils/color";
+function register() {
   return (
     <StyledLogin>
       <StyledLoginForm>
@@ -9,10 +11,13 @@ function login() {
           <input placeholder="id" />
         </InputWrapper>
         <InputWrapper>
+          <input placeholder="name" />
+        </InputWrapper>
+        <InputWrapper>
           <input placeholder="password" />
         </InputWrapper>
         <InputWrapper>
-          <input placeholder="password-confirm" />
+          <input placeholder="password confirm" />
         </InputWrapper>
         <StyledButtonWrapper>
           <StyledRegisterButton>회원가입</StyledRegisterButton>
@@ -22,7 +27,7 @@ function login() {
   );
 }
 
-export default login;
+export default register;
 
 const StyledLogin = styled.div`
   width: 100%;
@@ -46,8 +51,8 @@ const InputWrapper = styled.div`
   & > input {
     min-width: 20rem;
     height: 3rem;
-    border: 1px solid black;
-    background-color: rgba(176, 224, 230, 0.5);
+    border: 1px solid ${colors.lightgray};
+    background-color: ${colors.white};
     outline: none;
     padding: 0 1rem;
   }
@@ -67,25 +72,17 @@ const StyledButtonWrapper = styled.div`
   flex-direction: column;
   padding-top: 2rem;
 `;
-const StyledLoginButton = styled.button`
-  min-width: 20rem;
-  height: 3rem;
-  background-color: powderblue;
-  border: none;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-`;
 
 const StyledRegisterButton = styled.button`
   min-width: 20rem;
   height: 3rem;
   background-color: white;
-  border: 1px solid powderblue;
+  border: none;
   border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.5s;
+  background-color: ${colors.salmon};
+
   &:hover {
-    background-color: powderblue;
+    background-color: ${darken(0.1, colors.salmon)};
     border: none;
   }
 `;

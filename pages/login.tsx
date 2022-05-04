@@ -1,21 +1,63 @@
-import { darken } from "polished";
 import React from "react";
+import { darken } from "polished";
 import styled from "styled-components";
 import { colors } from "../utils/color";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import auth from "../api/auth/api";
+import { useDispatch } from "react-redux";
+import * as authAction from "../store/modules/auth";
+interface LoginForm {
+  id: string;
+  pw: string;
+}
+
 function login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const loginMutation = auth.login();
+
+  const onValid: SubmitHandler<LoginForm> = async (formData) => {
+    loginMutation.mutate(formData);
+    dispatch(authAction.login(loginMutation.data));
+    //실제는 라이프사이클로 처리
+    router.replace("/");
+  };
+
   return (
     <StyledLogin>
-      <StyledLoginForm>
+      <StyledLoginForm onSubmit={handleSubmit(onValid)}>
         <StyledTitle>로그인</StyledTitle>
         <InputWrapper>
-          <input placeholder="id" />
+          <input
+            placeholder="id"
+            {...register("id", {
+              required: "id is required",
+            })}
+          />
+          <StyledError>{errors["id"]?.message}</StyledError>
         </InputWrapper>
         <InputWrapper>
-          <input placeholder="password" />
+          <input
+            placeholder="password"
+            type="password"
+            {...register("pw", {
+              required: "pw is required",
+            })}
+          />
+          <StyledError>{errors["pw"]?.message}</StyledError>
         </InputWrapper>
         <StyledButtonWrapper>
-          <StyledLoginButton>로그인</StyledLoginButton>
-          <StyledRegisterButton>회원가입</StyledRegisterButton>
+          <StyledLoginButton type="submit">로그인</StyledLoginButton>
+          <Link href="/register">
+            <StyledRegisterButton>회원가입</StyledRegisterButton>
+          </Link>
         </StyledButtonWrapper>
       </StyledLoginForm>
     </StyledLogin>
@@ -38,6 +80,8 @@ const StyledTitle = styled.div`
 `;
 const InputWrapper = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   width: 100%;
   padding: 1rem 3rem;
@@ -54,6 +98,12 @@ const InputWrapper = styled.div`
   & > input::placeholder {
     color: ${colors.black};
   }
+`;
+const StyledError = styled.div`
+  font-size: 1rem;
+  padding-top: 0.8rem;
+  height: 1rem;
+  color: ${colors.red};
 `;
 const StyledLoginForm = styled.form`
   padding: 2rem 0;
@@ -83,12 +133,11 @@ const StyledLoginButton = styled.button`
 const StyledRegisterButton = styled.button`
   min-width: 20rem;
   height: 3rem;
-  background-color: ${colors.white};
-  border: 1px solid ${colors.salmon};
+  background-color: ${colors.beige};
+  border: none;
   border-radius: 0.5rem;
 
   &:hover {
-    border-color: ${darken(0.01, colors.salmon)};
-    background-color: ${darken(0.01, colors.white)};
+    background-color: ${darken(0.1, colors.beige)};
   }
 `;
