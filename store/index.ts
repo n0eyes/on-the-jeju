@@ -12,3 +12,5 @@ const makeStore: MakeStore<Store> = (context: Context) =>
 export const wrapper = createWrapper<Store>(makeStore, {
   debug: process.env.NODE_ENV !== "production",
 });
+
+export type RootState = ReturnType<typeof rootReducer>;

@@ -12,5 +12,5 @@ export interface LoginOutput {
 export interface RegisterForm {
   id: string;
   pw: string;
-  pwConfirm: string;
+  pwCheck: string;
 }

@@ -3,7 +3,7 @@ import { HYDRATE } from "next-redux-wrapper";
 import auth from "./auth";
 import { initialState } from "./auth";
 
-export interface RootState {
+interface RootState {
   auth: typeof initialState;
 }
 

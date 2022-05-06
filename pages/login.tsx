@@ -41,7 +41,7 @@ function login() {
               required: "id is required",
             })}
           />
-          <StyledError>{errors["id"]?.message}</StyledError>
+          {errors?.id && <StyledError>{errors?.id?.message}</StyledError>}
         </InputWrapper>
         <InputWrapper>
           <input
@@ -51,7 +51,7 @@ function login() {
               required: "pw is required",
             })}
           />
-          <StyledError>{errors["pw"]?.message}</StyledError>
+          {errors?.pw && <StyledError>{errors?.pw?.message}</StyledError>}
         </InputWrapper>
         <StyledButtonWrapper>
           <StyledLoginButton type="submit">로그인</StyledLoginButton>
@@ -81,14 +81,13 @@ const StyledTitle = styled.div`
 const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
   width: 100%;
   padding: 1rem 3rem;
   font-size: 1.2rem;
 
   & > input {
-    min-width: 20rem;
+    width: 20rem;
     height: 3rem;
     border: 1px solid ${colors.lightgray};
     background-color: ${colors.white};
@@ -100,10 +99,13 @@ const InputWrapper = styled.div`
   }
 `;
 const StyledError = styled.div`
-  font-size: 1rem;
-  padding-top: 0.8rem;
+  width: 20rem;
+  font-size: 0.8rem;
+  padding: 0 1rem;
   height: 1rem;
   color: ${colors.red};
+  margin-top: 0.5rem;
+  margin-bottom: -0.5rem;
 `;
 const StyledLoginForm = styled.form`
   padding: 2rem 0;

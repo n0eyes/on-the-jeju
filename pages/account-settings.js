@@ -4,4 +4,4 @@ function accountSettings() {
   return <div>account-settings</div>;
 }
 
-export default account - settings;
+export default accountSettings;
