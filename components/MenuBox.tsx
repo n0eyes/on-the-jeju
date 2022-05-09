@@ -30,7 +30,7 @@ function MenuBox() {
         ) : (
           <>
             <StyledItem onClick={onLogout}>로그아웃</StyledItem>
-            <Link href="/wishlist">
+            <Link href="/wishlists">
               <StyledItem>위시리스트</StyledItem>
             </Link>
           </>

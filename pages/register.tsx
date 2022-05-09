@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { darken } from "polished";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -18,8 +19,10 @@ function register() {
     getValues,
     formState: { errors },
   } = useForm<RegisterForm>();
-
-  const onValid: SubmitHandler<RegisterForm> = async (formData) => {};
+  const router = useRouter();
+  const onValid: SubmitHandler<RegisterForm> = async (formData) => {
+    router.replace("/login");
+  };
 
   return (
     <StyledRegister>
@@ -50,6 +53,7 @@ function register() {
         </InputWrapper>
         <InputWrapper>
           <input
+            type="password"
             placeholder="password"
             {...register("pw", {
               required: "Password is required",
@@ -64,6 +68,7 @@ function register() {
         </InputWrapper>
         <InputWrapper>
           <input
+            type="password"
             placeholder="password check"
             {...register("pwCheck", {
               required: "Password-Check is required",
