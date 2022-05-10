@@ -3,12 +3,13 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import Chart from "chart.js";
 import WishCategoryModal from "../../components/WishCategoryModal";
+
 function destination() {
   const [isWishOpened, setIsWishOpened] = useState(false);
-  const chartRef = useRef();
+  const chartRef = useRef(null);
 
   const onWishHandler = () => setIsWishOpened((prev) => !prev);
-  const onWishClose = (e) =>
+  const onWishClose = (e: MouseEvent) =>
     e.target === e.currentTarget && setIsWishOpened(false);
 
   const data = {
@@ -29,22 +30,23 @@ function destination() {
   };
 
   useEffect(() => {
-    const myChart = new Chart(chartRef.current, {
-      type: "radar",
-      data,
-      options: {
-        responsive: false,
-        elements: {
-          line: {
-            borderWidth: 3,
+    if (chartRef.current) {
+      const myChart = new Chart(chartRef.current, {
+        type: "radar",
+        data,
+        options: {
+          responsive: false,
+          elements: {
+            line: {
+              borderWidth: 3,
+            },
           },
         },
-      },
-    });
-
-    return () => {
-      myChart.destroy();
-    };
+      });
+      return () => {
+        myChart.destroy();
+      };
+    }
   }, []);
 
   return (
@@ -85,7 +87,7 @@ function destination() {
               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
             />
           </svg>
-          <span onClick={onWishHandler}>찜 하기</span>
+          <button onClick={onWishHandler}>찜 하기</button>
           {isWishOpened && <WishCategoryModal onClose={onWishClose} />}
         </StyledButtonWrapper>
       </StyledNav>
@@ -178,8 +180,13 @@ const StyledButtonWrapper = styled.div`
     width: 1.5rem;
     margin-right: 1rem;
   }
-  & > span {
+  & > button {
+    font-size: 1rem;
+    padding: 0;
+    background-color: transparent;
+    border: none;
     border-bottom: 1px solid black;
+    outline: none;
   }
 `;
 
