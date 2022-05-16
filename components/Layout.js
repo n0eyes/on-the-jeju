@@ -22,13 +22,11 @@ const StyledLayout = styled.div`
   width: 100vw;
   min-height: 100vh;
   display: flex;
-  padding: 0em 6em;
 `;
 
 const StyledChildrenWrapper = styled.div`
   flex-grow: 1;
   display: flex;
-  padding-top: 4rem;
-  padding-bottom: 7rem;
+  padding: 4rem 7rem;
   width: 100%;
 `;

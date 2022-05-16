@@ -3,8 +3,16 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import Chart from "chart.js";
 import WishCategoryModal from "../../components/WishCategoryModal";
+import destinationApi from "../../api/destination/api";
+import { DestinationOutput } from "../../api/destination";
+import { ReviewDto } from "../../api/destination";
+import { colors } from "../../utils/color";
+import { lighten } from "polished";
 
 function destination() {
+  const [info, setInfo] = useState<DestinationOutput["data"] | null>(null);
+  const [reviews, setReviews] = useState<ReviewDto | null>(null);
+  const [meta, setMeta] = useState<{}[]>([]);
   const [isWishOpened, setIsWishOpened] = useState(false);
   const chartRef = useRef(null);
 
@@ -12,7 +20,13 @@ function destination() {
   const onWishClose = (e: MouseEvent) =>
     e.target === e.currentTarget && setIsWishOpened(false);
 
-  const data = {
+  const getNextReviews = (index: number) => {
+    console.log(index);
+    const data = destinationApi.getNextReviews(index, 10);
+    setReviews(data);
+  };
+
+  const chart = {
     labels: ["뷰", "카페 및 식당", "가격", "편의시설"],
     datasets: [
       {
@@ -30,10 +44,18 @@ function destination() {
   };
 
   useEffect(() => {
-    if (chartRef.current) {
+    const { data } = destinationApi.getTravelSpot(1);
+    const meta = destinationApi.getMeta();
+    setInfo(data);
+    setReviews(data.reviewDto);
+    setMeta(meta);
+  }, []);
+
+  useEffect(() => {
+    if (chartRef.current && info) {
       const myChart = new Chart(chartRef.current, {
         type: "radar",
-        data,
+        data: chart,
         options: {
           responsive: false,
           elements: {
@@ -47,11 +69,12 @@ function destination() {
         myChart.destroy();
       };
     }
-  }, []);
+  }, [info]);
 
+  if (!info || !reviews) return <div>loading...</div>;
   return (
     <StyledDestination>
-      <StyledTitle>관광지 이름</StyledTitle>
+      <StyledTitle>{info.spotDto.name}</StyledTitle>
       <StyledNav>
         <StyledCommentWrapper>
           <svg
@@ -69,7 +92,7 @@ function destination() {
             />
           </svg>
           <span>4.96</span>
-          <Link href="/comments">후기 155개</Link>
+          <Link href="/comments">{`후기 ${info.reviewDto.content.length}개`}</Link>
           <Link href="/maps">위치</Link>
         </StyledCommentWrapper>
         <StyledButtonWrapper>
@@ -118,18 +141,29 @@ function destination() {
       <StyledMain>
         <StyledInfo>
           <StyledInfoTitle>상세 정보</StyledInfoTitle>
-          <StyledDesc>
-            관광지 정보 예시) 부서진 산호로 이루어진 백사장 등 빼어난 경관을
-            자랑하는 우도 8경이 유명하며, 인골분 이야기를 비롯한 몇 가지 설화와
-            잠수소리·해녀가 등의 민요가 전해진다. 남서쪽의 동천진동 포구에는
-            일제강점기인 1932년 일본인 상인들의 착취에 대항한 우도 해녀들의
-            항일항쟁을 기념하여 세운 해녀노래비가 있으며, 남동쪽 끝의
-            쇠머리오름에는 우도 등대가 있다. 성산포에서 1시간 간격으로
-            정기여객선이 운항된다.
-          </StyledDesc>
+          <StyledDesc>{info.spotDto.description}</StyledDesc>
         </StyledInfo>
         <canvas id="canvas" ref={chartRef}></canvas>
       </StyledMain>
+      <StyledReviewViewer>
+        <StyledScoreWrapper>
+          <StyledScore>💳 가격 4 / 5</StyledScore>
+          <StyledScore>💳 가격 4 / 5</StyledScore>
+          <StyledScore>💳 가격 4 / 5</StyledScore>
+          <StyledScore>💳 가격 4 / 5</StyledScore>
+        </StyledScoreWrapper>
+        <StyledReviewWrapper>
+          <span>Reviews</span>
+          {reviews?.content.map(({ id, content }) => (
+            <StyledReview key={id}>{content}</StyledReview>
+          ))}
+          <StyledMore
+            onClick={() => getNextReviews(reviews.pageable.pageNumber)}
+          >
+            더 보기
+          </StyledMore>
+        </StyledReviewWrapper>
+      </StyledReviewViewer>
     </StyledDestination>
   );
 }
@@ -141,6 +175,12 @@ const StyledDestination = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 2rem 20rem;
+  padding-bottom: 10rem;
+  @media (max-width: 1200px) {
+    padding: 0;
+    padding-bottom: 10rem;
+  }
 `;
 
 const StyledTitle = styled.div`
@@ -226,19 +266,25 @@ const StyledThumbnail = styled.img`
   border-radius: 1rem;
 `;
 
-const StyledMain = styled.div`
+const StyledMain = styled.section`
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   padding-top: 2rem;
   & > canvas {
-    width: 50%;
+    flex-grow: 1;
   }
 `;
 const StyledInfo = styled.div`
   width: 50%;
-
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 1200px) {
+    width: 100%;
+    margin-bottom: 2rem;
+  }
 `;
 const StyledInfoTitle = styled.div`
   font-size: 1.5rem;
@@ -247,5 +293,63 @@ const StyledInfoTitle = styled.div`
 `;
 const StyledDesc = styled.div`
   font-size: 1.1rem;
-  padding: 1rem 1rem;
+  padding: 1rem 0;
+  line-height: 1.5rem;
+`;
+
+const StyledReviewViewer = styled.section`
+  width: 100%;
+  padding: 1rem 2rem;
+  margin-top: 4rem;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid ${colors.lightgray};
+`;
+
+const StyledScoreWrapper = styled.ul`
+  display: flex;
+  justify-content: space-evenly;
+  padding: 5rem 0;
+`;
+
+const StyledScore = styled.li`
+  padding: 1rem 2rem;
+  font-size: 1.2;
+  font-weight: bold;
+`;
+
+const StyledReviewWrapper = styled.ul`
+  position: relative;
+  border: 1px solid ${colors.lightgray};
+  border-radius: 0.5rem;
+  padding: 1rem;
+
+  & > li:not(:last-child) {
+    border-bottom: 1px solid ${colors.lightgray};
+    margin-bottom: 3rem;
+  }
+
+  & > span {
+    position: absolute;
+    background-color: white;
+    border: 20px solid white;
+    top: 0;
+    left: 50%;
+    font-size: 1.2rem;
+    transform: translate(-50%, -50%);
+  }
+`;
+
+const StyledReview = styled.li`
+  padding: 1rem 0;
+`;
+
+const StyledMore = styled.button`
+  font-size: 1rem;
+  background-color: transparent;
+  border: none;
+  &:hover {
+    color: ${lighten(0.6, colors.black)};
+  }
 `;

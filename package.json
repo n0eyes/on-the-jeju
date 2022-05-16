@@ -11,6 +11,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",
     "@types/chart.js": "^2.9.37",
+    "@types/navermaps": "^3.0.13",
     "axios": "^0.27.2",
     "chart.js": "^2.9.4",
     "immer": "^9.0.12",

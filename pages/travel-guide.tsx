@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React, { useEffect, useReducer, useState } from "react";
 import styled, { css } from "styled-components";
 import travel from "../api/travel/api";
@@ -12,6 +13,7 @@ import {
   CLOSE_WEIGHT_MODAL,
   CLOSE_WISH_MODAL,
 } from "../reducer/travelGuide";
+import axios from "../utils/axios/axios";
 import { colors } from "../utils/color";
 
 const REGION_DUMMY = [
@@ -100,25 +102,27 @@ function travelGuide() {
       </StyledNav>
       <StyledDestinationWrapper>
         {spotList.map(({ spotId, url, spotName, spotDescription }) => (
-          <StyledDestination key={spotId}>
-            <StyledThumbnail src={url} alt={`${spotName}`} />
-            <StyledDescription>{spotDescription}</StyledDescription>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-              onClick={onWishHandler}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          </StyledDestination>
+          <Link href={`/destination/${spotId}`} key={spotId}>
+            <StyledDestination key={spotId}>
+              <StyledThumbnail src={url} alt={`${spotName}`} />
+              <StyledDescription>{spotDescription}</StyledDescription>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+                onClick={onWishHandler}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </StyledDestination>
+          </Link>
         ))}
       </StyledDestinationWrapper>
       {state?.isWeightOpened && <PriorityModal onClose={onModalClose} />}
@@ -194,13 +198,13 @@ const StyledPriority = styled.button`
   }
 `;
 
-const StyledDestinationWrapper = styled.div`
+const StyledDestinationWrapper = styled.ul`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, auto));
   grid-gap: 1.5rem;
 `;
 
-const StyledDestination = styled.div`
+const StyledDestination = styled.li`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -211,6 +215,7 @@ const StyledDestination = styled.div`
     width: 1.6rem;
     color: black;
     cursor: pointer;
+    z-index: 3;
   }
 `;
 

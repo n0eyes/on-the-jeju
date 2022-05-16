@@ -1,6 +1,55 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import axios from "../utils/axios/axios";
+
 function courseRecommendation() {
+  const [myLocation, setMyLocation] = useState<
+    { latitude: number; longitude: number } | string
+  >("");
+
+  useEffect(() => {
+    async function test() {
+      const data = await axios.get(
+        "api/map/driving?start=127.1058342,37.359708&goal=129.075986,35.179470"
+      );
+    }
+    test();
+  }, []);
+
+  //현재 위치를 추적합니다.
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    }
+
+    // 위치추적에 성공했을때 위치 값을 넣어줍니다.
+    function success(position: {
+      coords: { latitude: number; longitude: number };
+    }) {
+      setMyLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    }
+
+    // 위치 추적에 실패 했을때 초기값을 넣어줍니다.
+    function error() {
+      setMyLocation({ latitude: 37.4979517, longitude: 127.0276188 });
+    }
+  }, []);
+
+  const mapRef = useRef<HTMLElement | null | any>(null);
+
+  useEffect(() => {
+    if (typeof myLocation !== "string")
+      mapRef.current = new naver.maps.Map("map", {
+        center: new naver.maps.LatLng(
+          myLocation.latitude,
+          myLocation.longitude
+        ),
+        zoomControl: true,
+      });
+  }, [mapRef, myLocation]);
   return (
     <StyledCourseRecommendation>
       <StyledSection>
@@ -102,7 +151,7 @@ function courseRecommendation() {
           </StyledAccordion>
         </StyledCategoryWrapper>
       </StyledSection>
-      <img src="/assets/map.png" />
+      <StyledMapLayout id="map"></StyledMapLayout>
     </StyledCourseRecommendation>
   );
 }
@@ -184,4 +233,8 @@ const StyledThumbnail = styled.img`
 `;
 const StyledTitle = styled.div`
   font-size: 0.9rem;
+`;
+const StyledMapLayout = styled.div`
+  width: 30rem;
+  height: 30rem;
 `;
