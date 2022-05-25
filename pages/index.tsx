@@ -2,6 +2,9 @@ import Link from "next/link";
 import { darken } from "polished";
 import { colors } from "../utils/color";
 import styled from "styled-components";
+import { useEffect } from "react";
+import axios from "../utils/axios/axios";
+
 export default function Home() {
   return (
     <StyledHome>

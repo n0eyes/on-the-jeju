@@ -5,13 +5,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { start, goal } = req.query;
+  const { start, goal, waypoints } = req.query;
 
   let paths = [];
-
   try {
     const response = await fetch(
-      `https://naveropenapi.apigw-pub.fin-ntruss.com/map-direction-15/v1/driving?start=${start}&goal=${goal}`,
+      `https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving?start=${start}&goal=${goal}&waypoints=${waypoints}`,
       {
         headers: {
           "X-NCP-APIGW-API-KEY-ID": process.env.NEXT_PUBLIC_CLIENT_ID!,
@@ -24,5 +23,5 @@ export default async function handler(
     paths = [];
   }
 
-  res.status(200).json({ paths });
+  res.status(200).json(paths);
 }

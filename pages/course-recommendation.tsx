@@ -1,28 +1,41 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import axios from "../utils/axios/axios";
+import { colors } from "../utils/color";
+
+type lat = number;
+type lng = number;
+type Path = [lat, lng];
+type Paths = Path[];
 
 function courseRecommendation() {
-  const [myLocation, setMyLocation] = useState<
-    { latitude: number; longitude: number } | string
-  >("");
+  const mapRef = useRef<naver.maps.Map | undefined>(undefined);
+  const [paths, setPaths] = useState<Paths>([]);
+  const [myLocation, setMyLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  }>({
+    latitude: NaN,
+    longitude: NaN,
+  });
 
+  //경로 좌표값 요청
   useEffect(() => {
-    async function test() {
-      const data = await axios.get(
-        "api/map/driving?start=127.1058342,37.359708&goal=129.075986,35.179470"
+    (async () => {
+      const { data } = await axios.get(
+        `api/map?start=127.06644183722894,37.48914109104494&goal=127.03651698583508,37.500714048183134&waypoints=126.97229547371451,37.554605365326516|127.02812157421361,37.51997982158435`
       );
-    }
-    test();
+      setPaths(data.route.traoptimal[0].path);
+    })();
   }, []);
 
-  //현재 위치를 추적합니다.
+  //현재 위치를 추적
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(success, error);
     }
 
-    // 위치추적에 성공했을때 위치 값을 넣어줍니다.
+    // 위치추적에 성공했을때 위치 값을 삽입
     function success(position: {
       coords: { latitude: number; longitude: number };
     }) {
@@ -32,24 +45,45 @@ function courseRecommendation() {
       });
     }
 
-    // 위치 추적에 실패 했을때 초기값을 넣어줍니다.
+    // 위치 추적에 실패 했을때 초기값을 삽입
     function error() {
       setMyLocation({ latitude: 37.4979517, longitude: 127.0276188 });
     }
   }, []);
 
-  const mapRef = useRef<HTMLElement | null | any>(null);
-
+  //지도 그리기
   useEffect(() => {
-    if (typeof myLocation !== "string")
-      mapRef.current = new naver.maps.Map("map", {
-        center: new naver.maps.LatLng(
-          myLocation.latitude,
-          myLocation.longitude
-        ),
-        zoomControl: true,
-      });
-  }, [mapRef, myLocation]);
+    mapRef.current = new naver.maps.Map("map", {
+      center: new naver.maps.LatLng(myLocation.latitude, myLocation.longitude),
+      zoomControl: true,
+    });
+  }, [myLocation]);
+
+  //경로 그리기
+  useEffect(() => {
+    if (paths.length < 0) return;
+
+    let polylinePath: naver.maps.LatLng[] = [];
+
+    paths.map((path: Path) => {
+      polylinePath.push(new naver.maps.LatLng(path[1], path[0]));
+    });
+
+    new naver.maps.Polyline({
+      path: polylinePath, //선 위치 좌표배열
+      strokeColor: colors.salmon, //선 색
+      strokeOpacity: 0.7, //선 투명도 0 ~ 1
+      strokeWeight: 4, //선 두께
+      map: mapRef.current, //오버레이할 지도
+    });
+
+    // 배열(경로) 마지막 위치를 마크로 표시
+    new naver.maps.Marker({
+      position: polylinePath[polylinePath.length - 1], //마크 표시할 위치 배열의 마지막 위치
+      map: mapRef.current,
+    });
+  }, [paths, mapRef]);
+
   return (
     <StyledCourseRecommendation>
       <StyledSection>

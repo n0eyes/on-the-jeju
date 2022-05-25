@@ -4,8 +4,9 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        destination: "https://naveropenapi.apigw-pub.fin-ntruss.com/:path*",
-        source: "/:path*",
+        destination:
+          "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode:path*",
+        source: "/example/:path*",
       },
     ];
   },

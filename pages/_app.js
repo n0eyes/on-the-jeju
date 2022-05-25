@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }) {
         <Head>
           <script
             type="text/javascript"
-            src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=fs6pw6f8ex"
+            src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_CLIENT_ID}`}
           ></script>
         </Head>
         <Component {...pageProps} />

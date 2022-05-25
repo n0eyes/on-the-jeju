@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import styled from "styled-components";
 function wishlists() {
@@ -5,7 +6,9 @@ function wishlists() {
     <StyledTravelGuide>
       <StyledNav>
         <StyledTitle>위시 리스트</StyledTitle>
-        <StyledRecommend>최단 경로 추천</StyledRecommend>
+        <Link href="/course-recommendation">
+          <StyledRecommend>최단 경로 추천</StyledRecommend>
+        </Link>
       </StyledNav>
       <StyledDestinationWrapper>
         {[1, 2, 3].map(() => (
