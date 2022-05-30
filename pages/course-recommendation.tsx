@@ -7,7 +7,6 @@ type lat = number;
 type lng = number;
 type Path = [lat, lng];
 type Paths = Path[];
-
 function courseRecommendation() {
   const mapRef = useRef<naver.maps.Map | undefined>(undefined);
   const [paths, setPaths] = useState<Paths>([]);
@@ -73,7 +72,7 @@ function courseRecommendation() {
       path: polylinePath, //선 위치 좌표배열
       strokeColor: colors.salmon, //선 색
       strokeOpacity: 0.7, //선 투명도 0 ~ 1
-      strokeWeight: 4, //선 두께
+      strokeWeight: 5, //선 두께
       map: mapRef.current, //오버레이할 지도
     });
 

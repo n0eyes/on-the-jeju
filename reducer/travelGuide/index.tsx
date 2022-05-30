@@ -1,19 +1,24 @@
 import produce from "immer";
 
+export interface UserWeight {
+  viewWeight: number;
+  priceWeight: number;
+  facilityWeight: number;
+  surroundWeight: number;
+  [index: string]: number;
+}
 export interface SearchOptions {
-  location: string | null;
+  location: string;
   category: string | null;
-  userWeight: {
-    viewWeight: number | null;
-    priceWeight: number | null;
-    facilityWeight: number | null;
-    surroundWeight: number | null;
-  };
+  userWeight: UserWeight;
 }
 
 interface State {
+  isWishOpened: {
+    id: number | null;
+    opened: boolean;
+  };
   isWeightOpened: boolean;
-  isWishOpened: boolean;
   locationId: number;
   categoryId: number;
   searchOptions: SearchOptions;
@@ -25,18 +30,21 @@ interface Action {
 }
 
 export const initialState: State = {
+  isWishOpened: {
+    id: null,
+    opened: false,
+  },
   isWeightOpened: false,
-  isWishOpened: false,
-  locationId: 3,
+  locationId: 5,
   categoryId: 7,
   searchOptions: {
     location: "전체",
     category: "전체",
     userWeight: {
-      viewWeight: null,
-      priceWeight: null,
-      facilityWeight: null,
-      surroundWeight: null,
+      viewWeight: 0,
+      priceWeight: 0,
+      facilityWeight: 0,
+      surroundWeight: 0,
     },
   },
 };
@@ -46,6 +54,8 @@ export const TOGGLE_WEIGHT_MODAL = "TOGGLE_WEIGHT_MODAL";
 export const TOGGLE_WISH_MODAL = "TOGGLE_WISH_MODAL";
 export const CLOSE_WEIGHT_MODAL = "CLOSE_WEIGHT_MODAL";
 export const CLOSE_WISH_MODAL = "CLOSE_WISH_MODAL";
+export const INCREASE_USER_WEIGHT = "INCREASE_USER_WEIGHT";
+export const DECREASE_USER_WEIGHT = "DECREASE_USER_WEIGHT";
 
 export const TravelReducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -68,7 +78,7 @@ export const TravelReducer = (state: State, action: Action) => {
     }
     case TOGGLE_WISH_MODAL: {
       return produce(state, (draft) => {
-        draft.isWishOpened = !draft.isWishOpened;
+        draft.isWishOpened = { id: action.payload.spotId, opened: true };
       });
     }
     case CLOSE_WEIGHT_MODAL: {
@@ -78,7 +88,23 @@ export const TravelReducer = (state: State, action: Action) => {
     }
     case CLOSE_WISH_MODAL: {
       return produce(state, (draft) => {
-        draft.isWishOpened = false;
+        draft.isWishOpened = { id: null, opened: false };
+      });
+    }
+    case INCREASE_USER_WEIGHT: {
+      return produce(state, (draft) => {
+        const keys = Object.keys(draft.searchOptions.userWeight);
+
+        if (draft.searchOptions.userWeight[keys[action.payload]] < 5)
+          draft.searchOptions.userWeight[keys[action.payload]] += 1;
+      });
+    }
+    case DECREASE_USER_WEIGHT: {
+      return produce(state, (draft) => {
+        const keys = Object.keys(draft.searchOptions.userWeight);
+
+        if (draft.searchOptions.userWeight[keys[action.payload]] > 0)
+          draft.searchOptions.userWeight[keys[action.payload]] -= 1;
       });
     }
   }

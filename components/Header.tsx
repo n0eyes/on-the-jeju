@@ -28,6 +28,7 @@ function Header() {
       <StyledTitleWrapper>
         <Link href="/">로고</Link>
         <Link href="/">서비스 명</Link>
+        <Link href="/travel-guide">서비스 이용</Link>
       </StyledTitleWrapper>
       <StyledMenuWrapper>
         <Link href="/wishlists">

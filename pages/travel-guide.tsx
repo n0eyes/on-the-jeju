@@ -1,8 +1,10 @@
-import Link from "next/link";
-import React, { useEffect, useReducer, useState } from "react";
+import { useRouter } from "next/router";
+import React, { MouseEvent, useEffect, useReducer, useState } from "react";
 import styled, { css } from "styled-components";
 import travel from "../api/travel/api";
-import PriorityModal from "../components/PriorityModal";
+import { CreateNewWishListInput } from "../api/wishList";
+import wishList from "../api/wishList/api";
+import UserWeightModal from "../components/UserWeightModal";
 import WishCategoryModal from "../components/WishCategoryModal";
 import {
   TravelReducer,
@@ -12,20 +14,23 @@ import {
   TOGGLE_WISH_MODAL,
   CLOSE_WEIGHT_MODAL,
   CLOSE_WISH_MODAL,
+  INCREASE_USER_WEIGHT,
+  DECREASE_USER_WEIGHT,
 } from "../reducer/travelGuide";
-import axios from "../utils/axios/axios";
 import { colors } from "../utils/color";
 
 const REGION_DUMMY = [
   { id: 1, name: "동부" },
   { id: 2, name: "서부" },
-  { id: 3, name: "전체" },
+  { id: 3, name: "남부" },
+  { id: 4, name: "북부" },
+  { id: 5, name: "전체" },
 ];
 const TAGS_DUMMY = [
   { id: 4, name: "뷰" },
-  { id: 5, name: "카페 및 식당" },
   { id: 6, name: "가격" },
   { id: 7, name: "편의시설" },
+  { id: 5, name: "카페 및 식당" },
 ];
 
 type Tag = "location" | "category";
@@ -41,16 +46,20 @@ interface SpotList {
 function travelGuide() {
   const [state, dispatch] = useReducer(TravelReducer, initialState);
   const [spotList, setSpotList] = useState<SpotList[]>([]);
+  const mutation = wishList.createNewWishList();
+  // const mutation = wishList.createNewWishList();
+  const router = useRouter();
 
   const onModalHandler = () => dispatch({ type: TOGGLE_WEIGHT_MODAL });
-  const onModalClose = (e: MouseEvent) =>
+  const onModalClose = (e: MouseEvent<HTMLDivElement>) =>
     e.target === e.currentTarget && dispatch({ type: CLOSE_WEIGHT_MODAL });
 
-  const onWishHandler = () => dispatch({ type: TOGGLE_WISH_MODAL });
-  const onWishClose = (e: MouseEvent) =>
+  const onWishHandler = (spotId: number) =>
+    dispatch({ type: TOGGLE_WISH_MODAL, payload: { spotId } });
+  const onWishClose = (e: MouseEvent<HTMLDivElement>) =>
     e.target === e.currentTarget && dispatch({ type: CLOSE_WISH_MODAL });
 
-  const onClick = (id: number, method: Tag) => {
+  const onClickOptions = (id: number, method: Tag) => {
     let option;
 
     if (method === "location") {
@@ -63,6 +72,41 @@ function travelGuide() {
       type: CHANGE_OPTION,
       payload: { id, method, option },
     });
+
+    //need fetching
+  };
+
+  const onClickUserWeight = (method: "+" | "-", i: number) => {
+    if (method === "+") {
+      dispatch({
+        type: INCREASE_USER_WEIGHT,
+        payload: i,
+      });
+    } else if (method === "-") {
+      dispatch({
+        type: DECREASE_USER_WEIGHT,
+        payload: i,
+      });
+    }
+  };
+
+  const onSubmitUserWeight = () => {
+    if (state?.searchOptions) {
+      //need fetching
+      // setSpotList(data.content);
+      dispatch({ type: CLOSE_WEIGHT_MODAL });
+    }
+  };
+
+  const onClickSpot = (e: MouseEvent<HTMLLIElement>, spotId: number) => {
+    !(e.target instanceof SVGGraphicsElement) &&
+      router.push(`/destination/${spotId}`);
+    onWishHandler(spotId);
+  };
+
+  const onClickCreateButton = (data: CreateNewWishListInput) => {
+    //needs fetching
+    dispatch({ type: CLOSE_WISH_MODAL });
   };
 
   useEffect(() => {
@@ -80,7 +124,7 @@ function travelGuide() {
           {REGION_DUMMY.map(({ id, name }) => (
             <StyledTag
               key={id}
-              onClick={() => onClick(id, "location")}
+              onClick={() => onClickOptions(id, "location")}
               selected={state?.locationId === id}
             >
               {name}
@@ -91,7 +135,7 @@ function travelGuide() {
           {TAGS_DUMMY.map(({ id, name }) => (
             <StyledTag
               key={id}
-              onClick={() => onClick(id, "category")}
+              onClick={() => onClickOptions(id, "category")}
               selected={state?.categoryId === id}
             >
               {name}
@@ -102,31 +146,50 @@ function travelGuide() {
       </StyledNav>
       <StyledDestinationWrapper>
         {spotList.map(({ spotId, url, spotName, spotDescription }) => (
-          <Link href={`/destination/${spotId}`} key={spotId}>
-            <StyledDestination key={spotId}>
-              <StyledThumbnail src={url} alt={`${spotName}`} />
-              <StyledDescription>{spotDescription}</StyledDescription>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                onClick={onWishHandler}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </StyledDestination>
-          </Link>
+          <StyledDestination
+            onClick={(e) => onClickSpot(e, spotId)}
+            key={spotId}
+          >
+            <StyledThumbnail src={url} alt={`${spotName}`} />
+            <StyledSimpleInfo>
+              <div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="salmon"
+                  viewBox="0 0 24 24"
+                  stroke="currentFill"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </div>
+              <div>{spotName}</div>
+            </StyledSimpleInfo>
+            <StyledDescription>{spotDescription}</StyledDescription>
+          </StyledDestination>
         ))}
       </StyledDestinationWrapper>
-      {state?.isWeightOpened && <PriorityModal onClose={onModalClose} />}
-      {state?.isWishOpened && <WishCategoryModal onClose={onWishClose} />}
+      {state?.isWeightOpened && (
+        <UserWeightModal
+          meta={REGION_DUMMY}
+          weight={state.searchOptions.userWeight}
+          onClose={onModalClose}
+          onClick={onClickUserWeight}
+          onSubmit={onSubmitUserWeight}
+        />
+      )}
+      {state?.isWishOpened.id && (
+        <WishCategoryModal
+          onClick={onClickCreateButton}
+          onClose={onWishClose}
+          spotId={state.isWishOpened.id}
+        />
+      )}
     </StyledTravelGuide>
   );
 }
@@ -186,7 +249,7 @@ const StyledPriority = styled.button`
   position: absolute;
   right: 0;
   border: none;
-  color: black;
+  color: ${colors.white};
   background-color: ${colors.salmon};
   box-shadow: rgb(0 0 0 / 10%) 0px 4px 16px 0px;
   border-radius: 1rem;
@@ -208,17 +271,35 @@ const StyledDestination = styled.li`
   position: relative;
   display: flex;
   flex-direction: column;
-  & > svg {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
+  cursor: pointer;
+  &:hover {
+    & > div:last-child {
+      opacity: 1;
+    }
+  }
+`;
+const StyledSimpleInfo = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 2rem;
+  margin-top: 0.5rem;
+  div:first-child {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1rem;
+  }
+  & svg {
     width: 1.6rem;
     color: black;
     cursor: pointer;
-    z-index: 3;
   }
 `;
-
 const StyledThumbnail = styled.img`
   width: 100%;
   height: 18rem;
@@ -226,5 +307,12 @@ const StyledThumbnail = styled.img`
 `;
 
 const StyledDescription = styled.div`
-  padding: 1rem 0;
+  position: absolute;
+  width: 100%;
+  height: 18rem;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  padding: 1rem;
+  transition: opacity 0.3s;
 `;
