@@ -99,9 +99,11 @@ function travelGuide() {
   };
 
   const onClickSpot = (e: MouseEvent<HTMLLIElement>, spotId: number) => {
-    !(e.target instanceof SVGGraphicsElement) &&
-      router.push(`/destination/${spotId}`);
-    onWishHandler(spotId);
+    if (e.target instanceof SVGGraphicsElement) {
+      onWishHandler(spotId);
+      return;
+    }
+    router.push(`/destination/${spotId}`);
   };
 
   const onClickCreateButton = (data: CreateNewWishListInput) => {
