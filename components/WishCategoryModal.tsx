@@ -122,6 +122,8 @@ const StyledModalHeader = styled.div`
 `;
 const StyledModalBody = styled.div`
   width: 100%;
+  max-height: 30rem;
+  overflow-y: scroll;
   padding: 1rem 1rem;
 
   & > div + div {
