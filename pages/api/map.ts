@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   const { start, goal, waypoints } = req.query;
 
-  let paths = [];
+  let paths;
   try {
     const response = await fetch(
       `https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving?start=${start}&goal=${goal}&waypoints=${waypoints}`,

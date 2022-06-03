@@ -1,29 +1,44 @@
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import styled from "styled-components";
-import wishList from "../api/wishList/api";
 import { colors } from "../utils/color";
 import { darken } from "polished";
-import { useMutation } from "react-query";
-import axios from "../utils/axios/axios";
-import { CreateNewWishListInput } from "../api/wishList";
+import { AddWishListInput, CreateAndAddWishListInput } from "../api/wishList";
+import useAPI from "../utils/hook/useAPI";
+import { useInView } from "react-intersection-observer";
 
 interface WishCategoryModal {
-  onClick: (data: CreateNewWishListInput) => void;
+  onClick: (data: AddWishListInput) => void;
+  onSubmit: (data: CreateAndAddWishListInput) => void;
   onClose: (e: MouseEvent<HTMLDivElement>) => void;
-  spotId: number;
+  spotId: string;
 }
 
 function WishCategoryModal(props: WishCategoryModal) {
-  const { onClick: createNewWishList, onClose, spotId } = props;
+  const {
+    onSubmit: createNewWishList,
+    onClick: AddNewWishList,
+    onClose,
+    spotId,
+  } = props;
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [newWishListName, setNewWishListName] = useState<string>("");
-  const mockData = wishList.getWishListModal({ size: 10, page: 3 });
-
+  const { ref, inView } = useInView();
+  const api = useAPI();
+  const { data, fetchNextPage } = api.wishList.getWishList();
+  console.log(data);
   const toggleMode = () => setIsEditing((prev) => !prev);
+
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>
     setNewWishListName(e.target.value);
 
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage();
+    }
+  }, [inView]);
+
+  if (!data) return <div>Error</div>;
   return (
     <StyledBackground onClick={onClose}>
       <StyledModal>
@@ -52,12 +67,20 @@ function WishCategoryModal(props: WishCategoryModal) {
                 <StyledAddButton>+</StyledAddButton>
                 <StyledAddDesc>새로운 위시리스트 만들기</StyledAddDesc>
               </StyledListWrapper>
-              {mockData.favoriteDtoPage.content.map(({ id, name }) => (
-                <StyledListWrapper key={id}>
-                  <StyledThumbnail src="/assets/incheon.webp" />
-                  <StyledCategoryTitle>{name}</StyledCategoryTitle>
-                </StyledListWrapper>
-              ))}
+              {data.pages.map(({ favoriteListDtos }) =>
+                favoriteListDtos.content.map(
+                  ({ favoriteId, favoriteName, spotURL }) => (
+                    <StyledListWrapper
+                      key={favoriteId}
+                      onClick={() => AddNewWishList({ spotId, favoriteId })}
+                    >
+                      <StyledThumbnail src={spotURL} />
+                      <StyledCategoryTitle>{favoriteName}</StyledCategoryTitle>
+                    </StyledListWrapper>
+                  )
+                )
+              )}
+              <div ref={ref}></div>
             </>
           )}
         </StyledModalBody>

@@ -1,13 +1,20 @@
+import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import axios from "../utils/axios/axios";
-import { colors } from "../utils/color";
+import course from "../../api/course/api";
+import axios from "axios";
+import { colors } from "../../utils/color";
 
 type lat = number;
 type lng = number;
 type Path = [lat, lng];
 type Paths = Path[];
 function courseRecommendation() {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const mock = id && course.getWishListInfo(+id);
+  console.log("mock :>> ", mock);
   const mapRef = useRef<naver.maps.Map | undefined>(undefined);
   const [paths, setPaths] = useState<Paths>([]);
   const [myLocation, setMyLocation] = useState<{
@@ -22,8 +29,9 @@ function courseRecommendation() {
   useEffect(() => {
     (async () => {
       const { data } = await axios.get(
-        `api/map?start=127.06644183722894,37.48914109104494&goal=127.03651698583508,37.500714048183134&waypoints=126.97229547371451,37.554605365326516|127.02812157421361,37.51997982158435`
+        `/api/map?start=127.06644183722894,37.48914109104494&goal=127.03651698583508,37.500714048183134&waypoints=126.97229547371451,37.554605365326516|127.02812157421361,37.51997982158435`
       );
+      console.log("data :>> ", data);
       setPaths(data.route.traoptimal[0].path);
     })();
   }, []);
@@ -49,14 +57,21 @@ function courseRecommendation() {
       setMyLocation({ latitude: 37.4979517, longitude: 127.0276188 });
     }
   }, []);
-
+  console.log("render");
   //지도 그리기
+
+  document.readyState;
   useEffect(() => {
-    mapRef.current = new naver.maps.Map("map", {
-      center: new naver.maps.LatLng(myLocation.latitude, myLocation.longitude),
-      zoomControl: true,
-    });
-  }, [myLocation]);
+    if (window.naver) {
+      mapRef.current = new naver.maps.Map("map", {
+        center: new naver.maps.LatLng(
+          myLocation.latitude,
+          myLocation.longitude
+        ),
+        zoomControl: true,
+      });
+    }
+  }, [myLocation, window.naver]);
 
   //경로 그리기
   useEffect(() => {
@@ -68,20 +83,23 @@ function courseRecommendation() {
       polylinePath.push(new naver.maps.LatLng(path[1], path[0]));
     });
 
-    new naver.maps.Polyline({
-      path: polylinePath, //선 위치 좌표배열
-      strokeColor: colors.salmon, //선 색
-      strokeOpacity: 0.7, //선 투명도 0 ~ 1
-      strokeWeight: 5, //선 두께
-      map: mapRef.current, //오버레이할 지도
-    });
+    if (window.naver) {
+      new naver.maps.Polyline({
+        path: polylinePath, //선 위치 좌표배열
+        strokeColor: colors.salmon, //선 색
+        strokeOpacity: 0.7, //선 투명도 0 ~ 1
+        strokeWeight: 5, //선 두께
+        map: mapRef.current, //오버레이할 지도
+      });
 
-    // 배열(경로) 마지막 위치를 마크로 표시
-    new naver.maps.Marker({
-      position: polylinePath[polylinePath.length - 1], //마크 표시할 위치 배열의 마지막 위치
-      map: mapRef.current,
-    });
-  }, [paths, mapRef]);
+      // 배열(경로) 마지막 위치를 마크로 표시
+      new naver.maps.Marker({
+        position: polylinePath[polylinePath.length - 1], //마크 표시할 위치 배열의 마지막 위치
+        map: mapRef.current,
+        animation: naver.maps.Animation.DROP,
+      });
+    }
+  }, [paths, mapRef, window.naver]);
 
   return (
     <StyledCourseRecommendation>
@@ -195,7 +213,7 @@ const StyledCourseRecommendation = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
-  padding: 2rem 0;
+  padding: 2rem 7rem;
   & > img {
     width: 50%;
   }

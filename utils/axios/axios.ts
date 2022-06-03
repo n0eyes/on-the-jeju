@@ -1,30 +1,46 @@
 import axios from "axios";
 
-const baseURL = "";
+export enum AXIOS_KEY {
+  axiosBasic = "axiosBasic",
+  axiosLogin = "axiosLogin",
+  axiosLogout = "axiosLogout",
+  axiosWithAuth = "axiosWithAuth",
+}
 
-export default axios.create({
-  baseURL,
-});
+export default function createAxios(endpoint: string) {
+  const axiosBasic = axios.create({
+    baseURL: endpoint,
+    headers: { "Content-Type": "application/json" },
+  });
 
-export const axiosLogin = axios.create({
-  baseURL,
-  method: "post",
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true,
-});
+  const axiosLogin = axios.create({
+    method: "post",
+    baseURL: endpoint,
+    headers: { "Content-Type": "application/json" },
+    withCredentials: true,
+  });
 
-export const axiosLogout = axios.create({
-  baseURL,
-  withCredentials: true,
-});
+  const axiosLogout = axios.create({
+    baseURL: endpoint,
+    headers: { "Content-Type": "application/json" },
+    withCredentials: true,
+  });
 
-export const axiosPrivate = axios.create({
-  baseURL,
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true,
-});
+  const axiosWithAuth = axios.create({
+    baseURL: endpoint,
+    headers: { "Content-Type": "application/json" },
+    withCredentials: true,
+  });
 
-export const axiosRefresh = axios.create({
-  baseURL,
-  withCredentials: true,
-});
+  const axiosRefresh = axios.create({
+    baseURL: endpoint,
+    withCredentials: true,
+  });
+
+  return {
+    axiosBasic,
+    axiosWithAuth,
+    axiosLogin,
+    axiosLogout,
+  };
+}

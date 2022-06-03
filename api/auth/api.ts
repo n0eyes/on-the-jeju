@@ -1,7 +1,8 @@
 import { mock } from "./mock";
 import { real } from "./real";
-const auth = {
-  ...mock,
+const authAPI = {
+  // ...mock,
+  ...real,
 };
 
-export default auth;
+export default authAPI;

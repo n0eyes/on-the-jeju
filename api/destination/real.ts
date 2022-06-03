@@ -1,12 +1,40 @@
-import { DestinationInput, DestinationOutput } from "./index";
-import { useFetchDestination } from "../../query/destination/destinationQuery";
-import { UseQueryResult } from "react-query";
-import { AxiosResponse } from "axios";
+import { useFetchDestinationReview } from "./../../query/destination/destinationQuery";
+import {
+  DestinationInfoOutput,
+  DestinationMetaOutput,
+  DestinationReviewOutput,
+} from "./index";
+import {
+  useFetchDestinationInfo,
+  useFetchDestinationMeta,
+} from "../../query/destination/destinationQuery";
+import { UseInfiniteQueryResult, UseQueryResult } from "react-query";
+import { AxiosInstance, AxiosResponse } from "axios";
+import withAuth from "../../utils/axios/withAuth";
 
-export const real = {
-  getDestinationInfo(
-    params: DestinationInput
-  ): UseQueryResult<AxiosResponse<DestinationOutput>> {
-    return useFetchDestination(params);
-  },
+export interface DestinationAPI {
+  getDestinationInfo: (spotId: string) => UseQueryResult<DestinationInfoOutput>;
+  getDestinationReview: (
+    spotId: string
+  ) => UseInfiniteQueryResult<DestinationReviewOutput>;
+  getDestinationMeta: () => UseQueryResult<DestinationMetaOutput>;
+}
+
+export const createDestinationAPI = (
+  request: AxiosInstance
+): DestinationAPI => {
+  return {
+    getDestinationInfo: (
+      spotId: string
+    ): UseQueryResult<DestinationInfoOutput> =>
+      useFetchDestinationInfo(withAuth(request), spotId),
+
+    getDestinationMeta: (): UseQueryResult<DestinationMetaOutput> =>
+      useFetchDestinationMeta(withAuth(request)),
+
+    getDestinationReview: (
+      spotId: string
+    ): UseInfiniteQueryResult<DestinationReviewOutput> =>
+      useFetchDestinationReview(withAuth(request), spotId),
+  };
 };

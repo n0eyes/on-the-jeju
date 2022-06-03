@@ -1,79 +1,65 @@
 import { useRouter } from "next/router";
-import React, { MouseEvent, useEffect, useReducer, useState } from "react";
+import React, { MouseEvent, useEffect, useReducer } from "react";
 import styled, { css } from "styled-components";
-import travel from "../api/travel/api";
-import { CreateNewWishListInput } from "../api/wishList";
-import wishList from "../api/wishList/api";
 import UserWeightModal from "../components/UserWeightModal";
-import WishCategoryModal from "../components/WishCategoryModal";
+import { useInView } from "react-intersection-observer";
 import {
   TravelReducer,
   initialState,
   CHANGE_OPTION,
   TOGGLE_WEIGHT_MODAL,
-  TOGGLE_WISH_MODAL,
   CLOSE_WEIGHT_MODAL,
-  CLOSE_WISH_MODAL,
   INCREASE_USER_WEIGHT,
   DECREASE_USER_WEIGHT,
+  UPDATE_DATA,
+  SearchOptions,
+  CHANGE_WEIGHT,
 } from "../reducer/travelGuide";
 import { colors } from "../utils/color";
-
-const REGION_DUMMY = [
-  { id: 1, name: "동부" },
-  { id: 2, name: "서부" },
-  { id: 3, name: "남부" },
-  { id: 4, name: "북부" },
-  { id: 5, name: "전체" },
-];
-const TAGS_DUMMY = [
-  { id: 4, name: "뷰" },
-  { id: 6, name: "가격" },
-  { id: 7, name: "편의시설" },
-  { id: 5, name: "카페 및 식당" },
-];
+import useAPI from "../utils/hook/useAPI";
+import { MutateOptions } from "react-query";
 
 type Tag = "location" | "category";
 
-interface SpotList {
-  spotId: number; //관광지 번호
-  spotName: string | null; //"관광지 이름",
-  spotAddress: string | null; //"관광지 주소"
-  spotDescription: string | null; //"이러이러한 관관광지이다",
-  url: string; //관광지 사진 url
-}
-
 function travelGuide() {
   const [state, dispatch] = useReducer(TravelReducer, initialState);
-  const [spotList, setSpotList] = useState<SpotList[]>([]);
-  const mutation = wishList.createNewWishList();
-  // const mutation = wishList.createNewWishList();
+  const { ref, inView } = useInView();
   const router = useRouter();
+  const api = useAPI();
+  const {
+    mutate,
+    data: spotData,
+    error: spotError,
+  } = api.travel.getTravelSpot();
+  const { data: meta, error: metaError } = api.travel.getTravelMeta();
 
   const onModalHandler = () => dispatch({ type: TOGGLE_WEIGHT_MODAL });
   const onModalClose = (e: MouseEvent<HTMLDivElement>) =>
     e.target === e.currentTarget && dispatch({ type: CLOSE_WEIGHT_MODAL });
 
-  const onWishHandler = (spotId: number) =>
-    dispatch({ type: TOGGLE_WISH_MODAL, payload: { spotId } });
-  const onWishClose = (e: MouseEvent<HTMLDivElement>) =>
-    e.target === e.currentTarget && dispatch({ type: CLOSE_WISH_MODAL });
-
   const onClickOptions = (id: number, method: Tag) => {
-    let option;
+    let option = "";
 
-    if (method === "location") {
-      option = REGION_DUMMY.filter((dummy) => dummy.id === id)[0].name;
-    } else if (method === "category") {
-      option = TAGS_DUMMY.filter((dummy) => dummy.id === id)[0].name;
+    if (meta && method === "location") {
+      option = meta.data.regionDummy.filter((meta) => meta.id === id)[0].name;
+    } else if (meta && method === "category") {
+      option = meta.data.categoryDummy.filter((meta) => meta.id === id)[0].name;
     }
+    if (state) {
+      const searchOptions = {
+        ...state.searchOptions,
+        [method]: option,
+      };
 
-    dispatch({
-      type: CHANGE_OPTION,
-      payload: { id, method, option },
-    });
-
-    //need fetching
+      fetchIndex(searchOptions, {
+        onSuccess: (data) => {
+          dispatch({
+            type: CHANGE_OPTION,
+            payload: { id, method, option, data },
+          });
+        },
+      });
+    }
   };
 
   const onClickUserWeight = (method: "+" | "-", i: number) => {
@@ -91,39 +77,54 @@ function travelGuide() {
   };
 
   const onSubmitUserWeight = () => {
-    if (state?.searchOptions) {
-      //need fetching
-      // setSpotList(data.content);
-      dispatch({ type: CLOSE_WEIGHT_MODAL });
+    if (state && state.searchOptions) {
+      fetchIndex(state.searchOptions, {
+        onSuccess: (data) => {
+          dispatch({
+            type: CHANGE_WEIGHT,
+            payload: { searchOptions: state.searchOptions, data },
+          });
+          dispatch({ type: CLOSE_WEIGHT_MODAL });
+        },
+      });
     }
   };
 
-  const onClickSpot = (e: MouseEvent<HTMLLIElement>, spotId: number) => {
-    if (e.target instanceof SVGGraphicsElement) {
-      onWishHandler(spotId);
-      return;
-    }
-    router.push(`/destination/${spotId}`);
+  // 리팩터링 포인트
+  const fetchIndex = (
+    searchOptions: SearchOptions,
+    options?: MutateOptions
+  ) => {
+    mutate({ searchOptions, pagination: { size: 18, page: 0 } }, options);
   };
 
-  const onClickCreateButton = (data: CreateNewWishListInput) => {
-    //needs fetching
-    dispatch({ type: CLOSE_WISH_MODAL });
+  const fetchNextPage = (
+    searchOptions: SearchOptions,
+    options?: MutateOptions
+  ) => {
+    let page = 0;
+    if (spotData && !spotData.data.last) {
+      page = spotData.data.pageable.pageNumber + 1;
+    }
+    mutate({ searchOptions, pagination: { size: 18, page } }, options);
   };
 
   useEffect(() => {
-    if (state?.searchOptions) {
-      const travelSpotMutation = travel.getTravelSpot(state.searchOptions);
-      const { data } = travelSpotMutation.mutate(state.searchOptions);
-      setSpotList(data.content);
+    if (state && inView) {
+      const { searchOptions } = state;
+      fetchNextPage(searchOptions, {
+        onSuccess: (payload) => dispatch({ type: UPDATE_DATA, payload }),
+      });
     }
-  }, []);
+  }, [inView]);
 
+  if (metaError || spotError) return <div>Error</div>;
+  if (!meta || !state) return <div>Loading...</div>;
   return (
     <StyledTravelGuide>
       <StyledNav>
         <StyledRegionWrapper>
-          {REGION_DUMMY.map(({ id, name }) => (
+          {meta.data.regionDummy.map(({ id, name }) => (
             <StyledTag
               key={id}
               onClick={() => onClickOptions(id, "location")}
@@ -134,7 +135,7 @@ function travelGuide() {
           ))}
         </StyledRegionWrapper>
         <StyledTagWrapper>
-          {TAGS_DUMMY.map(({ id, name }) => (
+          {meta.data.categoryDummy.map(({ id, name }) => (
             <StyledTag
               key={id}
               onClick={() => onClickOptions(id, "category")}
@@ -147,49 +148,36 @@ function travelGuide() {
         <StyledPriority onClick={onModalHandler}>우선 순위</StyledPriority>
       </StyledNav>
       <StyledDestinationWrapper>
-        {spotList.map(({ spotId, url, spotName, spotDescription }) => (
-          <StyledDestination
-            onClick={(e) => onClickSpot(e, spotId)}
-            key={spotId}
-          >
-            <StyledThumbnail src={url} alt={`${spotName}`} />
-            <StyledSimpleInfo>
-              <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="salmon"
-                  viewBox="0 0 24 24"
-                  stroke="currentFill"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </div>
-              <div>{spotName}</div>
-            </StyledSimpleInfo>
-            <StyledDescription>{spotDescription}</StyledDescription>
-          </StyledDestination>
-        ))}
+        {state.spotList.map(
+          ({ spotId, url, spotName, spotDescription, spotAddress }) => (
+            <StyledDestination
+              onClick={() => router.push(`/destination/${spotId}`)}
+              key={spotId}
+            >
+              <StyledThumbnail
+                src={url.length === 0 ? "/assets/daegu.webp" : url}
+                alt={`${spotName}`}
+              />
+              <StyledSimpleInfo>
+                <div>{spotName}</div>
+                <div>{spotAddress}</div>
+              </StyledSimpleInfo>
+              <StyledDescription>
+                {spotDescription?.includes("No") ? "" : spotDescription}
+              </StyledDescription>
+            </StyledDestination>
+          )
+        )}
       </StyledDestinationWrapper>
+      <div ref={ref}></div>
+
       {state?.isWeightOpened && (
         <UserWeightModal
-          meta={REGION_DUMMY}
+          meta={meta.data.categoryDummy}
           weight={state.searchOptions.userWeight}
           onClose={onModalClose}
           onClick={onClickUserWeight}
           onSubmit={onSubmitUserWeight}
-        />
-      )}
-      {state?.isWishOpened.id && (
-        <WishCategoryModal
-          onClick={onClickCreateButton}
-          onClose={onWishClose}
-          spotId={state.isWishOpened.id}
         />
       )}
     </StyledTravelGuide>
@@ -204,6 +192,7 @@ const StyledTravelGuide = styled.div`
   display: flex;
   flex-direction: column;
   padding-bottom: 5rem;
+  padding: 0 7rem;
 `;
 
 const StyledNav = styled.ul`
@@ -265,14 +254,15 @@ const StyledPriority = styled.button`
 
 const StyledDestinationWrapper = styled.ul`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, auto));
-  grid-gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(25rem, auto));
+  grid-gap: 2rem;
 `;
 
 const StyledDestination = styled.li`
   position: relative;
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem;
   cursor: pointer;
   &:hover {
     & > div:last-child {
@@ -281,25 +271,16 @@ const StyledDestination = styled.li`
   }
 `;
 const StyledSimpleInfo = styled.div`
-  display: flex;
-  align-items: center;
   width: 100%;
   height: 2rem;
   margin-top: 0.5rem;
   div:first-child {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.5rem;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 1rem;
+    font-weight: 500;
   }
-  & svg {
-    width: 1.6rem;
-    color: black;
-    cursor: pointer;
+  div:last-child {
+    font-size: 0.9rem;
+    color: gray;
+    padding: 0.5rem 0;
   }
 `;
 const StyledThumbnail = styled.img`
@@ -313,8 +294,11 @@ const StyledDescription = styled.div`
   width: 100%;
   height: 18rem;
   border-radius: 1rem;
+  color: ${colors.white};
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   padding: 1rem;
+  overflow-y: scroll;
   transition: opacity 0.3s;
+  line-height: 1.5rem;
 `;

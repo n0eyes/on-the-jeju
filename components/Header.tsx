@@ -1,8 +1,8 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
+import { colors } from "../utils/color";
 import MenuBox from "./MenuBox";
-
 function Header() {
   const [onlyClick, setOnlyClick] = useState(false);
   const [isMenuOpened, setIsMenuOpened] = useState(false);
@@ -26,9 +26,11 @@ function Header() {
   return (
     <StyledHeader>
       <StyledTitleWrapper>
-        <Link href="/">로고</Link>
-        <Link href="/">서비스 명</Link>
-        <Link href="/travel-guide">서비스 이용</Link>
+        <Link href="/">
+          <img src="/assets/logo.svg" alt="logo" />
+        </Link>
+        <Link href="/">온더 제주</Link>
+        <Link href="/travel-guide">여행하기</Link>
       </StyledTitleWrapper>
       <StyledMenuWrapper>
         <Link href="/wishlists">
@@ -83,9 +85,17 @@ const StyledHeader = styled.div`
 
 const StyledTitleWrapper = styled.div`
   display: flex;
+  align-items: center;
+  & > img {
+    width: 2rem;
+    margin-right: 1rem;
+  }
 
+  & > a {
+    margin-right: 1rem;
+  }
   & > a:nth-child(2) {
-    padding-left: 1rem;
+    color: ${colors.salmon};
   }
 `;
 

@@ -1,10 +1,19 @@
-import { LoginOutput } from "./index";
+import { AxiosInstance } from "axios";
+import { LoginOutput, RegisterOutput } from "./index";
 import { UseMutationResult } from "react-query";
-import { useFetchLogin } from "./../../query/auth/authQuery";
+import { useFetchLogin, useFetchRegister } from "./../../query/auth/authQuery";
 
-export const real = {
-  login(): UseMutationResult<LoginOutput> {
-    return useFetchLogin();
-  },
-  register() {},
+export interface AuthAPI {
+  login: () => UseMutationResult<LoginOutput>;
+  register: () => UseMutationResult<RegisterOutput>;
+}
+
+export const createAuthAPI = (request: AxiosInstance): AuthAPI => {
+  return {
+    login: (): UseMutationResult<LoginOutput> => useFetchLogin(request),
+    register: (): UseMutationResult<RegisterOutput> =>
+      useFetchRegister(request),
+  };
 };
+
+export const real = {};

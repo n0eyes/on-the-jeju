@@ -5,9 +5,9 @@ import { colors } from "../utils/color";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import auth from "../api/auth/api";
 import { useDispatch } from "react-redux";
 import * as authAction from "../store/modules/auth";
+import useAPI from "../utils/hook/useAPI";
 interface LoginForm {
   id: string;
   pw: string;
@@ -21,13 +21,19 @@ function login() {
   } = useForm<LoginForm>();
   const dispatch = useDispatch();
   const router = useRouter();
-  const loginMutation = auth.login();
+  const api = useAPI();
+  const { mutate } = api.auth.login();
 
   const onValid: SubmitHandler<LoginForm> = async (formData) => {
-    loginMutation.mutate(formData);
-    dispatch(authAction.login(loginMutation.data));
-    //실제는 라이프사이클로 처리
-    router.replace("/");
+    mutate(
+      { email: formData.id, password: formData.pw },
+      {
+        onSuccess(data) {
+          dispatch(authAction.login(JSON.parse(JSON.stringify(data))));
+          router.replace("/");
+        },
+      }
+    );
   };
 
   return (

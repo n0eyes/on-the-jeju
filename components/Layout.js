@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import Footer from "./Footer";
 import Header from "../components/Header";
 
 function Layout({ children }) {
@@ -9,7 +8,6 @@ function Layout({ children }) {
       <StyledLayout>
         <Header />
         <StyledChildrenWrapper>{children}</StyledChildrenWrapper>
-        <Footer />
       </StyledLayout>
     </>
   );
@@ -27,6 +25,6 @@ const StyledLayout = styled.div`
 const StyledChildrenWrapper = styled.div`
   flex-grow: 1;
   display: flex;
-  padding: 4rem 7rem;
+  padding: 4rem 0;
   width: 100%;
 `;

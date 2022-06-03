@@ -1,7 +1,7 @@
-import { DestinationOutput, ReviewDto } from "./index";
+import { DestinationInfoOutput } from "./index";
 export const mock = {
   getTravelSpot(id: number) {
-    const response: DestinationOutput = {
+    const response: DestinationInfoOutput = {
       status: 200,
       success: true,
       message: "성공",
@@ -47,65 +47,12 @@ export const mock = {
             url: "/assets/daegu.webp",
           },
         ],
-        reviewDto: {
-          content: [
-            {
-              id: 9,
-              content: "review1",
-            },
-            {
-              id: 16,
-              content: "review2",
-            },
-            {
-              id: 146,
-              content: "review3",
-            },
-            {
-              id: 136,
-              content: "review4",
-            },
-            {
-              id: 126,
-              content: "review5",
-            },
-            {
-              id: 216,
-              content: "review6",
-            },
-          ],
-          pageable: {
-            sort: {
-              empty: true,
-              unsorted: true,
-              sorted: false,
-            },
-            offset: 0,
-            pageNumber: 0,
-            pageSize: 10,
-            paged: true,
-            unpaged: false,
-          },
-          last: false,
-          totalPages: 10,
-          totalElements: 100,
-          sort: {
-            empty: true,
-            unsorted: true,
-            sorted: false,
-          },
-          first: true,
-          number: 0,
-          size: 10,
-          numberOfElements: 10,
-          empty: false,
-        },
       },
-      userScore: 0.2,
+      isFavoriteSpot: false,
     };
     return response;
   },
-  getNextReviews(index: number, size: number): ReviewDto {
+  getNextReviews(index: number, size: number) {
     return {
       content: [
         {

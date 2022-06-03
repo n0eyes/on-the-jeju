@@ -1,3 +1,9 @@
+export interface Pagination {
+  size: number;
+  page: number;
+  [index: string]: string | number;
+}
+
 export interface TravelSpotInput {
   location: string;
   category: string | null;
@@ -8,7 +14,10 @@ export interface TravelSpotInput {
     surroundWeight: number;
   };
 }
-
+export interface TravelSearchOptions<T, K> {
+  searchOptions: T;
+  pagination: K;
+}
 export interface TravelSpotOutput {
   status: number;
   success: boolean;
@@ -20,7 +29,6 @@ export interface TravelSpotOutput {
       spotAddress: string | null; //"관광지 주소"
       spotDescription: string | null; //"이러이러한 관관광지이다",
       url: string; //관광지 사진 url
-      isWished: boolean;
     }[];
 
     pageable: {
@@ -49,4 +57,18 @@ export interface TravelSpotOutput {
     numberOfElements: number;
     empty: false;
   };
+}
+
+export interface TravelMetaOutput {
+  status: number;
+  success: boolean;
+  categoryDummy: {
+    id: number;
+    name: string;
+  }[];
+
+  regionDummy: {
+    id: number;
+    name: string;
+  }[];
 }

@@ -4,6 +4,7 @@ import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "../utils/color";
+import useAPI from "../utils/hook/useAPI";
 
 interface RegisterForm {
   id: string;
@@ -20,8 +21,17 @@ function register() {
     formState: { errors },
   } = useForm<RegisterForm>();
   const router = useRouter();
-  const onValid: SubmitHandler<RegisterForm> = async (formData) => {
-    router.replace("/login");
+  const api = useAPI();
+  const mutation = api?.auth.register();
+
+  const onValid: SubmitHandler<RegisterForm> = async (
+    formData: RegisterForm
+  ) => {
+    const { id, name, pw } = formData;
+    console.log("id,name,pw :>> ", id);
+    console.log("id,name,pw :>> ", name);
+    console.log("id,name,pw :>> ", pw);
+    mutation.mutate({ email: id, username: name });
   };
 
   return (
@@ -33,7 +43,8 @@ function register() {
             {...register("id", {
               required: "ID is required",
               pattern: {
-                value: /^[a-z]+[a-z0-9]{5,19}$/g,
+                value:
+                  /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/g,
                 message:
                   "Must consist of 6 to 20 alphabetic characters or a number.",
               },

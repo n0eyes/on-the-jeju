@@ -1,3 +1,4 @@
+import { darken } from "polished";
 import React, { MouseEvent } from "react";
 import styled from "styled-components";
 import { UserWeight } from "../reducer/travelGuide";
@@ -14,6 +15,7 @@ interface UserWeightModalProps {
 function UserWeightModal(props: UserWeightModalProps) {
   const { meta, weight, onClose, onClick, onSubmit } = props;
   const weightList = Object.keys(weight);
+
   return (
     <StyledPriorityBackground onClick={onClose}>
       <StyledModal>
@@ -63,7 +65,7 @@ const StyledModal = styled.div`
 const StyledCategory = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
   gap: 2rem;
   padding: 1.5rem 0;
@@ -96,8 +98,8 @@ const StyledButton = styled.button`
 `;
 const StyledConfirm = styled.button`
   width: 10rem;
-  background-color: white;
-  color: ${colors.salmon};
+  background-color: ${colors.salmon};
+  color: ${colors.white};
   border: 1px solid ${colors.salmon};
   border-radius: 0.5rem;
   font-size: 1em;
@@ -105,6 +107,6 @@ const StyledConfirm = styled.button`
   padding: 0.5rem 0;
   transition: background-color 0.2s;
   &:hover {
-    background-color: ${colors.lightsalmon};
+    background-color: ${darken(0.1, colors.salmon)};
   }
 `;

@@ -1,53 +1,68 @@
-export interface WishListModalInput {
+export interface WishListInput {
   size: number;
   page: number;
   [index: string]: number;
 }
 
-export interface WishListModalOutput {
+export interface WishListOutput {
   status: number;
   success: boolean;
   message: string;
 
-  favoriteDtoPage: {
+  favoriteListDtos: {
     content: {
-      id: number;
-      name: string;
+      favoriteId: number;
+      favoriteName: string;
+      spotURL: string;
     }[];
-  };
-  pageable: {
+    pageable: {
+      sort: {
+        empty: true;
+        unsorted: true;
+        sorted: false;
+      };
+      offset: number;
+      pageNumber: number;
+      pageSize: number;
+      paged: true;
+      unpaged: false;
+    };
+    last: false;
+    totalPages: number;
+    totalElements: number;
+    number: number;
     sort: {
       empty: true;
       unsorted: true;
       sorted: false;
     };
-    offset: number;
-    pageNumber: number;
-    pageSize: number;
-    paged: true;
-    unpaged: false;
+    size: number;
+    first: true;
+    numberOfElements: number;
+    empty: false;
   };
-  last: false;
-  totalPages: number;
-  totalElements: number;
-  number: number;
-  sort: {
-    empty: true;
-    unsorted: true;
-    sorted: false;
-  };
-  size: number;
-  first: true;
-  numberOfElements: number;
-  empty: false;
 }
 
-export interface CreateNewWishListInput {
-  spotId: number;
+export interface CreateAndAddWishListInput {
+  spotId: string;
   favoriteName: string;
 }
 
-export interface CreateNewWishListOutput {
+export interface AddWishListInput {
+  spotId: string;
+  favoriteId: number;
+}
+
+export interface CreateAndAddWishListOutput {
+  status: number;
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+  };
+}
+export interface AddWishListOutput {
   status: number;
   success: boolean;
   message: string;
