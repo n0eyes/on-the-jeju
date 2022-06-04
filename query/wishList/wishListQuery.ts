@@ -46,7 +46,10 @@ export const useFetchCreateAndAddWishList = (request: AxiosInstance) =>
       return fetchCreateAndAddWishList(request, form);
     },
     {
-      onSuccess: () => queryClient.invalidateQueries("destination"),
+      onSuccess: () =>
+        queryClient.invalidateQueries("destination", {
+          refetchInactive: true,
+        }),
     }
   );
 
@@ -64,7 +67,10 @@ export const useFetchAddWishList = (request: AxiosInstance) =>
       return fetchAndAddWishList(request, form);
     },
     {
-      onSuccess: () => queryClient.invalidateQueries("destination"),
+      onSuccess: () =>
+        queryClient.invalidateQueries("destination", {
+          refetchInactive: true,
+        }),
     }
   );
 

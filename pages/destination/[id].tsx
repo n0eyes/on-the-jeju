@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect, MouseEvent } from "react";
 import styled from "styled-components";
 import Chart from "chart.js";
 import WishCategoryModal from "../../components/WishCategoryModal";
-import destinationApi from "../../api/destination/api";
 import { colors } from "../../utils/color";
 import { useRouter } from "next/router";
 import useAPI from "../../utils/hook/useAPI";
