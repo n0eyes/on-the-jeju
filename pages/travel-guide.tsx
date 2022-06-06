@@ -96,7 +96,7 @@ function travelGuide() {
     searchOptions: SearchOptions,
     options?: MutateOptions
   ) => {
-    mutate({ searchOptions, pagination: { size: 18, page: 0 } }, options);
+    mutate({ searchOptions, pagination: { size: 108, page: 0 } }, options);
   };
 
   const fetchNextPage = (
@@ -107,7 +107,7 @@ function travelGuide() {
     if (spotData && !spotData.data.last) {
       page = spotData.data.pageable.pageNumber + 1;
     }
-    mutate({ searchOptions, pagination: { size: 18, page } }, options);
+    mutate({ searchOptions, pagination: { size: 108, page } }, options);
   };
 
   useEffect(() => {
@@ -119,8 +119,8 @@ function travelGuide() {
     }
   }, [inView]);
 
-  if (metaError || spotError) return <div>Error</div>;
-  if (!meta || !state) return <div>Loading...</div>;
+  if (metaError || spotError) return null;
+  if (!meta || !state) return null;
   return (
     <StyledTravelGuide>
       <StyledNav>
@@ -256,8 +256,8 @@ const StyledPriority = styled.button`
 const StyledDestinationWrapper = styled.ul`
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(25.5rem, 25.5rem));
-  justify-content: center;
+  grid-template-columns: repeat(auto-fill, minmax(31rem, 31rem));
+  justify-content: space-between;
   grid-gap: 2rem;
 `;
 
@@ -265,6 +265,7 @@ const StyledDestination = styled.li`
   position: relative;
   display: flex;
   flex-direction: column;
+  font-size: 1.2rem;
   margin-bottom: 1rem;
   cursor: pointer;
   &:hover {
@@ -289,14 +290,14 @@ const StyledSimpleInfo = styled.div`
 `;
 const StyledThumbnail = styled.img`
   width: 100%;
-  height: 18rem;
+  height: 30rem;
   border-radius: 1rem;
 `;
 
 const StyledDescription = styled.div`
   position: absolute;
   width: 100%;
-  height: 18rem;
+  height: 30rem;
   border-radius: 1rem;
   color: ${colors.white};
   background-color: rgba(0, 0, 0, 0.5);
@@ -304,5 +305,5 @@ const StyledDescription = styled.div`
   padding: 1rem;
   overflow-y: scroll;
   transition: opacity 0.3s;
-  line-height: 1.5rem;
+  line-height: 2rem;
 `;

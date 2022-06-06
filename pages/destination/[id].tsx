@@ -164,8 +164,8 @@ function destination() {
     }
   }, [inView, meta]);
 
-  if (isLoading) return <div>loading...</div>;
-  if (!info || !meta || !review) return <div>error</div>;
+  if (isLoading) return null;
+  if (!info || !meta || !review) return null;
   return (
     <StyledDestination>
       <StyledTitle>{info.data.spotDto.name}</StyledTitle>

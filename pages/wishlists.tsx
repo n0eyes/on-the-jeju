@@ -17,7 +17,7 @@ function wishlists() {
     }
   }, [inView]);
 
-  if (!data) return <div>error</div>;
+  if (!data) return null;
   return (
     <StyledTravelGuide>
       <StyledNav>

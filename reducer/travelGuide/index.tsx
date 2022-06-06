@@ -114,7 +114,7 @@ export const TravelReducer = (state: State, action: Action) => {
       return produce(state, (draft) => {
         const keys = Object.keys(draft.searchOptions.userWeight);
 
-        if (draft.searchOptions.userWeight[keys[action.payload]] < 10)
+        if (draft.searchOptions.userWeight[keys[action.payload]] < 3)
           draft.searchOptions.userWeight[keys[action.payload]] += 1;
       });
     }
