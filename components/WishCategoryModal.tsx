@@ -25,7 +25,7 @@ function WishCategoryModal(props: WishCategoryModal) {
   const [newWishListName, setNewWishListName] = useState<string>("");
   const { ref, inView } = useInView();
   const api = useAPI();
-  const { data, fetchNextPage } = api.wishList.getWishList();
+  const { data, isLoading, fetchNextPage } = api.wishList.getWishList();
   console.log(data);
   const toggleMode = () => setIsEditing((prev) => !prev);
 
@@ -38,7 +38,7 @@ function WishCategoryModal(props: WishCategoryModal) {
     }
   }, [inView]);
 
-  if (!data) return <div>Error</div>;
+  if (!data || isLoading) return null;
   return (
     <StyledBackground onClick={onClose}>
       <StyledModal>

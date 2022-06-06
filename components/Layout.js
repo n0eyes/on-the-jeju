@@ -25,6 +25,7 @@ const StyledLayout = styled.div`
 const StyledChildrenWrapper = styled.div`
   flex-grow: 1;
   display: flex;
+  flex-direction: column;
   padding: 4rem 0;
   width: 100%;
 `;

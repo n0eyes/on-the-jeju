@@ -1,22 +1,31 @@
+import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import course from "../../api/course/api";
-import axios from "axios";
+import styled, { css } from "styled-components";
+import DeleteConfirmModal from "../../components/DeleteConfirmModal";
 import { colors } from "../../utils/color";
+import useAPI from "../../utils/hook/useAPI";
 
 type lat = number;
 type lng = number;
 type Path = [lat, lng];
 type Paths = Path[];
+
+type SettingCourse = {
+  spotId: number;
+  spotName: string;
+  position: string;
+  spotAddress: string;
+}[];
 function courseRecommendation() {
   const router = useRouter();
   const { id } = router.query;
-
-  const mock = id && course.getWishListInfo(+id);
-  console.log("mock :>> ", mock);
   const mapRef = useRef<naver.maps.Map | undefined>(undefined);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
   const [paths, setPaths] = useState<Paths>([]);
+  const [isSetting, setIsSetting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [settingCourse, setSettingCourse] = useState<SettingCourse>([]);
   const [myLocation, setMyLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -24,17 +33,86 @@ function courseRecommendation() {
     latitude: NaN,
     longitude: NaN,
   });
+  const api = useAPI();
+  const { data, isLoading } = api.recommendation.getWishListById(id as string);
+  const { mutate: mutateWishListById } = api.wishList.deleteWishListById();
+  const { data: recommendedSpotList, mutate: mutateRecommendedSpot } =
+    api.recommendation.getRecommendedSpot();
 
-  //경로 좌표값 요청
-  useEffect(() => {
-    (async () => {
-      const { data } = await axios.get(
-        `/api/map?start=127.06644183722894,37.48914109104494&goal=127.03651698583508,37.500714048183134&waypoints=126.97229547371451,37.554605365326516|127.02812157421361,37.51997982158435`
-      );
-      console.log("data :>> ", data);
-      setPaths(data.route.traoptimal[0].path);
-    })();
-  }, []);
+  const toggleSettingMode = () => setIsSetting((prev) => !prev);
+  const cancelSetting = () => {
+    setIsSetting(false);
+    setSettingCourse([]);
+    setPaths([]);
+  };
+  const confirmSetting = async () => {
+    const request = settingCourse.map(({ spotAddress }) =>
+      axios(`/api/geocode?query=${spotAddress}`)
+    );
+
+    const spotList = { spotIdList: settingCourse.map(({ spotId }) => spotId) };
+    const geoInfo = await Promise.all(request).then((responses) =>
+      responses.map((res) => res.data)
+    );
+    const coordinate = geoInfo.map(({ addresses }) => ({
+      x: addresses[0].x,
+      y: addresses[0].y,
+    }));
+
+    const { data } = await axios.get(
+      `/api/map?start=${coordinate[0].x},${coordinate[0].y}&goal=${
+        coordinate[1].x
+      },${coordinate[1].y}&waypoints=${coordinate
+        .map((each) => `${each.x},${each.y}`)
+        .join("|")}`
+    );
+
+    mutateRecommendedSpot({ id, spotList });
+    setPaths(data.route.traoptimal[0].path);
+    setIsSetting(false);
+    setSettingCourse([]);
+  };
+  const openDeleteModal = () => setIsDeleting(true);
+  const closeDeleteModal = () => setIsDeleting(false);
+  const deleteWishListById = () =>
+    mutateWishListById(id, {
+      onSuccess: () => router.replace("/wishlists"),
+    });
+
+  const addCourse = (course: {
+    spotId: number;
+    spotName: string;
+    spotAddress: string;
+  }) => {
+    let position = "";
+    if (isAddedCourse(course.spotId)) return;
+    else if (settingCourse.length === 0) {
+      position = "출발지";
+    } else if (settingCourse.length === 1) {
+      position = "목적지";
+    } else {
+      position = "경유지";
+    }
+    setSettingCourse((prev) => [...prev, { ...course, position }]);
+  };
+
+  const setPosition = (spotId: number): string => {
+    let position = "";
+    settingCourse.forEach((course) => {
+      if (course.spotId === spotId) position = course.position;
+    });
+
+    return position;
+  };
+
+  const isAddedCourse = (spotId: number): boolean => {
+    let added = false;
+    settingCourse.forEach((course) => {
+      if (course.spotId === spotId) added = true;
+    });
+
+    return added;
+  };
 
   //현재 위치를 추적
   useEffect(() => {
@@ -57,12 +135,11 @@ function courseRecommendation() {
       setMyLocation({ latitude: 37.4979517, longitude: 127.0276188 });
     }
   }, []);
-  console.log("render");
+
   //지도 그리기
 
-  document.readyState;
   useEffect(() => {
-    if (window.naver) {
+    if (canvasRef.current) {
       mapRef.current = new naver.maps.Map("map", {
         center: new naver.maps.LatLng(
           myLocation.latitude,
@@ -71,47 +148,86 @@ function courseRecommendation() {
         zoomControl: true,
       });
     }
-  }, [myLocation, window.naver]);
+  }, [myLocation, canvasRef.current]);
 
   //경로 그리기
   useEffect(() => {
-    if (paths.length < 0) return;
+    if (paths.length === 0 || !mapRef.current) return;
 
     let polylinePath: naver.maps.LatLng[] = [];
-
     paths.map((path: Path) => {
       polylinePath.push(new naver.maps.LatLng(path[1], path[0]));
     });
 
-    if (window.naver) {
+    new naver.maps.Polyline({
+      path: polylinePath, //선 위치 좌표배열
+      strokeColor: colors.salmon, //선 색
+      strokeOpacity: 0.7, //선 투명도 0 ~ 1
+      strokeWeight: 5, //선 두께
+      map: mapRef.current, //오버레이할 지도
+    });
+
+    // 배열(경로) 마지막 위치를 마크로 표시
+
+    new naver.maps.Marker({
+      position: polylinePath[0], //마크 표시할 위치 배열의 마지막 위치
+      map: mapRef.current,
+      animation: naver.maps.Animation.DROP,
+    });
+
+    new naver.maps.Marker({
+      position: polylinePath[polylinePath.length - 1], //마크 표시할 위치 배열의 마지막 위치
+      map: mapRef.current,
+      animation: naver.maps.Animation.DROP,
+    });
+
+    mapRef.current.setCenter(polylinePath[0]);
+
+    return () => {
+      //Polyline 초기화
       new naver.maps.Polyline({
-        path: polylinePath, //선 위치 좌표배열
-        strokeColor: colors.salmon, //선 색
-        strokeOpacity: 0.7, //선 투명도 0 ~ 1
-        strokeWeight: 5, //선 두께
+        path: [], //선 위치 좌표배열
+        strokeOpacity: 1, //선
         map: mapRef.current, //오버레이할 지도
       });
-
-      // 배열(경로) 마지막 위치를 마크로 표시
-      new naver.maps.Marker({
-        position: polylinePath[polylinePath.length - 1], //마크 표시할 위치 배열의 마지막 위치
-        map: mapRef.current,
-        animation: naver.maps.Animation.DROP,
-      });
-    }
-  }, [paths, mapRef, window.naver]);
-
+    };
+  }, [paths, mapRef.current]);
+  if (isLoading || !data) return null;
   return (
-    <StyledCourseRecommendation>
-      <StyledSection>
-        <StyledMainNav>
-          <StyledMainTitle>추천 경로</StyledMainTitle>
-          <StyledSettingButton>완료</StyledSettingButton>
-        </StyledMainNav>
-        <StyledCategoryWrapper>
-          <StyledAccordion>
-            <StyledCategory>
-              <StyledCategoryTitle>가보고 싶은 곳</StyledCategoryTitle>
+    <>
+      <StyledCourseRecommendation>
+        <StyledSection>
+          <StyledMainNav>
+            <StyledMainTitle>추천 경로</StyledMainTitle>
+            <StyledSettingButtonWrapper>
+              {isSetting ? (
+                <>
+                  <StyledSettingButton
+                    isSetting={false}
+                    onClick={cancelSetting}
+                  >
+                    취소
+                  </StyledSettingButton>
+                  <StyledSettingButton
+                    isSetting={isSetting}
+                    onClick={confirmSetting}
+                  >
+                    완료
+                  </StyledSettingButton>
+                </>
+              ) : (
+                <StyledSettingButton
+                  isSetting={isSetting}
+                  onClick={toggleSettingMode}
+                >
+                  설정
+                </StyledSettingButton>
+              )}
+            </StyledSettingButtonWrapper>
+          </StyledMainNav>
+          <StyledCategoryWrapper>
+            <StyledWishList>
+              <StyledWishListTitle>{data.favoriteName}</StyledWishListTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -119,91 +235,89 @@ function courseRecommendation() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth="2"
+                onClick={openDeleteModal}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
-            </StyledCategory>
-            <StyledDestination>
-              <StyledThumbnail src="/assets/seoul.webp" />
-              <StyledTitle>성산 일출봉</StyledTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </StyledDestination>
-            <StyledDestination>
-              <StyledThumbnail src="/assets/incheon.webp" />
-              <StyledTitle>테마 파크</StyledTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </StyledDestination>
-          </StyledAccordion>
-          <StyledAccordion>
-            <StyledCategory>
-              <StyledCategoryTitle>카테고리 제목</StyledCategoryTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                />
-              </svg>
-            </StyledCategory>
-          </StyledAccordion>
-          <StyledAccordion>
-            <StyledCategory>
-              <StyledCategoryTitle>카테고리 제목</StyledCategoryTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-                />
-              </svg>
-            </StyledCategory>
-          </StyledAccordion>
-        </StyledCategoryWrapper>
-      </StyledSection>
-      <StyledMapLayout id="map"></StyledMapLayout>
-    </StyledCourseRecommendation>
+            </StyledWishList>
+            <StyledAccordion>
+              {data.favoriteSpotListDtos.map(
+                ({ spotId, spotName, url, spotAddress }) => (
+                  <StyledDestination key={spotId}>
+                    <StyledThumbnail src={url} />
+                    <StyledTitle>{spotName}</StyledTitle>
+                    {isSetting && (
+                      <StyledSVGWrapper position={setPosition(spotId)}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke={
+                            isAddedCourse(spotId) ? "salmon" : "currentColor"
+                          }
+                          strokeWidth="2"
+                          onClick={() =>
+                            addCourse({ spotId, spotName, spotAddress })
+                          }
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </StyledSVGWrapper>
+                    )}
+                  </StyledDestination>
+                )
+              )}
+            </StyledAccordion>
+          </StyledCategoryWrapper>
+        </StyledSection>
+        <StyledMapLayout id="map" ref={canvasRef}></StyledMapLayout>
+        {isDeleting && (
+          <DeleteConfirmModal
+            favoriteName={data.favoriteName}
+            onClick={closeDeleteModal}
+            onSubmit={deleteWishListById}
+          />
+        )}
+      </StyledCourseRecommendation>
+      {recommendedSpotList && (
+        <>
+          <StyledRecommendedHeader>추천 관광지</StyledRecommendedHeader>
+          <StyledRecommendedWrapper>
+            {recommendedSpotList.spotList.map((region) =>
+              region.map(
+                ({ spotId, spotName, spotAddress, spotDescription, url }) => (
+                  <StyledRecommendedSpot
+                    onClick={() => router.push(`/destination/${spotId}`)}
+                    key={spotId}
+                  >
+                    <StyledRecommendedSpotThumbnail
+                      src={url.length === 0 ? "/assets/daegu.webp" : url}
+                      alt={`${spotName}`}
+                    />
+                    <StyledSimpleInfo>
+                      <div>{spotName}</div>
+                      <div>{spotAddress}</div>
+                    </StyledSimpleInfo>
+                    <StyledDescription>
+                      {spotDescription?.includes("No") ? "" : spotDescription}
+                    </StyledDescription>
+                  </StyledRecommendedSpot>
+                )
+              )
+            )}
+          </StyledRecommendedWrapper>
+        </>
+      )}
+    </>
   );
 }
 
@@ -227,11 +341,34 @@ const StyledMainNav = styled.div`
   align-items: center;
   padding-right: 2rem;
 `;
-const StyledSettingButton = styled.button`
+
+const StyledSettingButtonWrapper = styled.div`
+  display: flex;
+`;
+
+const StyledSettingButton = styled.button<{
+  isSetting: boolean;
+}>`
+  margin-left: 1rem;
   padding: 0.5rem 1.5rem;
   background-color: transparent;
   border: 1px solid lightgray;
   border-radius: 0.5rem;
+  position: relative;
+
+  ${({ isSetting }) =>
+    isSetting &&
+    css`
+      &::after {
+        content: "출발지, 목적지, 경유지 순으로 체크해주세요";
+        width: 30rem;
+        text-align: end;
+        color: ${colors.salmon};
+        position: absolute;
+        top: 150%;
+        right: 0;
+      }
+    `}
 `;
 const StyledMainTitle = styled.div`
   font-size: 2rem;
@@ -239,26 +376,31 @@ const StyledMainTitle = styled.div`
 `;
 const StyledCategoryWrapper = styled.div`
   width: 100%;
-  padding: 1rem 2rem 1rem 0;
+  padding: 3rem 2rem 1rem 0;
 `;
 
 const StyledAccordion = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 2rem 0;
+  height: 70vh;
+  overflow-y: scroll;
 `;
-const StyledCategory = styled.div`
+const StyledWishList = styled.div`
   width: 100%;
   display: flex;
   justify-content: space-between;
+  position: relative;
   padding: 2rem 1rem;
   border-radius: 1rem;
   box-shadow: rgb(0 0 0 / 15%) 0px 4px 16px 0px;
   & > svg {
-    width: 1.2rem;
+    width: 1.5rem;
+    position: absolute;
+    right: 1rem;
+    cursor: pointer;
   }
 `;
-const StyledCategoryTitle = styled.span`
+const StyledWishListTitle = styled.span`
   font-size: 1.2rem;
 `;
 const StyledDestination = styled.div`
@@ -269,11 +411,24 @@ const StyledDestination = styled.div`
   align-items: center;
   margin-top: 1.5rem;
   position: relative;
-
+`;
+const StyledSVGWrapper = styled.div<{
+  position: string;
+}>`
+  position: absolute;
+  right: 1rem;
   & > svg {
     width: 1.5rem;
+    cursor: pointer;
+  }
+
+  &::before {
+    content: ${({ position }) => `'${position}'`};
+    color: ${colors.salmon};
     position: absolute;
-    right: 1rem;
+    left: -4rem;
+    top: 50%;
+    transform: translateY(-50%);
   }
 `;
 const StyledThumbnail = styled.img`
@@ -286,6 +441,61 @@ const StyledTitle = styled.div`
   font-size: 0.9rem;
 `;
 const StyledMapLayout = styled.div`
-  width: 30rem;
-  height: 30rem;
+  width: 50%;
+`;
+
+const StyledRecommendedWrapper = styled.ul`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(25rem, auto));
+  grid-gap: 2rem;
+  padding: 0 7rem;
+`;
+
+const StyledRecommendedSpot = styled.li`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  &:hover {
+    & > div:last-child {
+      opacity: 1;
+    }
+  }
+`;
+const StyledSimpleInfo = styled.div`
+  width: 100%;
+  height: 2rem;
+  margin-top: 0.5rem;
+  div:first-child {
+    font-weight: 500;
+    font-size: 1.3rem;
+  }
+  div:last-child {
+    font-size: 0.9rem;
+    color: gray;
+    padding: 0.5rem 0;
+  }
+`;
+const StyledRecommendedSpotThumbnail = styled.img`
+  width: 100%;
+  height: 18rem;
+  border-radius: 1rem;
+`;
+
+const StyledDescription = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 18rem;
+  border-radius: 1rem;
+  color: ${colors.white};
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  padding: 1rem;
+  overflow-y: scroll;
+  transition: opacity 0.3s;
+  line-height: 1.5rem;
+`;
+const StyledRecommendedHeader = styled.h1`
+  padding: 2rem 7rem;
 `;

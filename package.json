@@ -12,6 +12,7 @@
     "@reduxjs/toolkit": "^1.8.1",
     "@types/chart.js": "^2.9.37",
     "@types/navermaps": "^3.0.13",
+    "@types/react-slick": "^0.23.8",
     "axios": "^0.27.2",
     "chart.js": "^2.9.4",
     "immer": "^9.0.12",
@@ -24,7 +25,9 @@
     "react-intersection-observer": "^9.2.0",
     "react-query": "^3.38.1",
     "react-redux": "^8.0.1",
+    "react-slick": "^0.29.0",
     "redux-persist": "^6.0.0",
+    "slick-carousel": "^1.8.1",
     "styled-components": "^5.3.5"
   },
   "devDependencies": {

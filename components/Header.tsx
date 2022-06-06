@@ -120,20 +120,20 @@ const StyledMenu = styled.div<{ tabIndex: number; opened: boolean }>`
     opened &&
     css`
       & > div:first-child {
-        transform: rotateZ(45deg) translateY(0.6rem);
+        transform: rotateZ(45deg) translateY(0.65rem);
       }
       & > div:nth-child(2) {
         display: none;
       }
       & > div:nth-child(3) {
-        transform: rotateZ(-45deg) translateY(-0.6rem);
+        transform: rotateZ(-45deg) translateY(-0.65rem);
       }
     `};
 `;
 
 const StyledMenuLine = styled.div`
   width: 1.5rem;
-  height: 2px;
+  height: 1px;
   background-color: black;
   transition: transform 0.5s;
 `;

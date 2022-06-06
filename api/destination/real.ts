@@ -9,7 +9,7 @@ import {
   useFetchDestinationMeta,
 } from "../../query/destination/destinationQuery";
 import { UseInfiniteQueryResult, UseQueryResult } from "react-query";
-import { AxiosInstance, AxiosResponse } from "axios";
+import { AxiosInstance } from "axios";
 import withAuth from "../../utils/axios/withAuth";
 
 export interface DestinationAPI {

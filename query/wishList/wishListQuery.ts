@@ -3,6 +3,7 @@ import {
   AddWishListOutput,
   CreateAndAddWishListInput,
   CreateAndAddWishListOutput,
+  DeleteWishListById,
   WishListOutput,
 } from "./../../api/wishList/index";
 import { AxiosInstance } from "axios";
@@ -79,5 +80,23 @@ const fetchAndAddWishList = async (
   form: AddWishListInput
 ) => {
   const { data } = await request.post(`/user/favorite/form`, form);
+  return data;
+};
+
+export const useFetchDeleteWishListById = (request: AxiosInstance) =>
+  useMutation(
+    (id: string): Promise<DeleteWishListById> => {
+      return fetchDeleteWishListById(request, id);
+    },
+    {
+      onSuccess: () =>
+        queryClient.invalidateQueries("wishList", {
+          refetchInactive: true,
+        }),
+    }
+  );
+
+const fetchDeleteWishListById = async (request: AxiosInstance, id: string) => {
+  const { data } = await request.delete(`/user/favoriteList/${id}`);
   return data;
 };

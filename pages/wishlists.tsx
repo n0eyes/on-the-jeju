@@ -32,26 +32,7 @@ function wishlists() {
                 key={favoriteId}
               >
                 <StyledDestination>
-                  <StyledThumbnailWrapper>
-                    <StyledThumbnail
-                      src={
-                        favoriteListDtos.content[0].spotURL ||
-                        "/assets/incheon.webp"
-                      }
-                    />
-                    <StyledThumbnail
-                      src={
-                        favoriteListDtos.content[1].spotURL ||
-                        "/assets/incheon.webp"
-                      }
-                    />
-                    <StyledThumbnail
-                      src={
-                        favoriteListDtos.content[1].spotURL ||
-                        "/assets/incheon.webp"
-                      }
-                    />
-                  </StyledThumbnailWrapper>
+                  <StyledThumbnail src={spotURL} />
                   <StyledDescription>{favoriteName}</StyledDescription>
                 </StyledDestination>
               </Link>
@@ -92,38 +73,25 @@ const StyledTitle = styled.div`
 const StyledDestinationWrapper = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, auto));
-  grid-gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(25rem, auto));
+  grid-gap: 2rem;
 `;
 
 const StyledDestination = styled.div`
-  position: relative;
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem;
   cursor: pointer;
-`;
-
-const StyledThumbnailWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-gap: 0.5rem;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  & > img:first-child {
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 1;
-    grid-row-end: 3;
-  }
 `;
 
 const StyledThumbnail = styled.img`
   width: 100%;
-  height: 100%;
+  height: 18rem;
   border-radius: 1rem;
 `;
 
 const StyledDescription = styled.div`
+  font-size: 1.3rem;
   padding: 1rem 0;
+  font-weight: bold;
 `;

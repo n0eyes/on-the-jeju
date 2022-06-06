@@ -78,6 +78,7 @@ function travelGuide() {
 
   const onSubmitUserWeight = () => {
     if (state && state.searchOptions) {
+      console.log(state.searchOptions);
       fetchIndex(state.searchOptions, {
         onSuccess: (data) => {
           dispatch({
@@ -173,7 +174,7 @@ function travelGuide() {
 
       {state?.isWeightOpened && (
         <UserWeightModal
-          meta={meta.data.categoryDummy}
+          meta={meta.data.categoryDummy.slice(1)}
           weight={state.searchOptions.userWeight}
           onClose={onModalClose}
           onClick={onClickUserWeight}
@@ -253,8 +254,10 @@ const StyledPriority = styled.button`
 `;
 
 const StyledDestinationWrapper = styled.ul`
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(25rem, auto));
+  grid-template-columns: repeat(auto-fill, minmax(25.5rem, 25.5rem));
+  justify-content: center;
   grid-gap: 2rem;
 `;
 
@@ -276,6 +279,7 @@ const StyledSimpleInfo = styled.div`
   margin-top: 0.5rem;
   div:first-child {
     font-weight: 500;
+    font-size: 1.3rem;
   }
   div:last-child {
     font-size: 0.9rem;

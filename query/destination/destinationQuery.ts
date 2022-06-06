@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosPromise } from "axios";
+import { AxiosInstance } from "axios";
 import {
   DestinationInfoOutput,
   DestinationMetaOutput,
@@ -13,7 +13,10 @@ export const useFetchDestinationInfo = (
 ) => {
   return useQuery(
     ["destination"],
-    (): Promise<DestinationInfoOutput> => fetchDestinationInfo(request, spotId)
+    (): Promise<DestinationInfoOutput> => fetchDestinationInfo(request, spotId),
+    {
+      enabled: !!spotId,
+    }
   );
 };
 
@@ -40,6 +43,8 @@ export const useFetchDestinationReview = (
         page.reviewListDto.last
           ? undefined
           : page.reviewListDto.pageable.pageNumber + 1,
+
+      enabled: !!spotId,
     }
   );
 };

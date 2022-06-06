@@ -1,14 +1,16 @@
+export interface CommonResponse {
+  status: number;
+  success: boolean;
+  message: string;
+}
+
 export interface WishListInput {
   size: number;
   page: number;
   [index: string]: number;
 }
 
-export interface WishListOutput {
-  status: number;
-  success: boolean;
-  message: string;
-
+export interface WishListOutput extends CommonResponse {
   favoriteListDtos: {
     content: {
       favoriteId: number;
@@ -53,10 +55,7 @@ export interface AddWishListInput {
   favoriteId: number;
 }
 
-export interface CreateAndAddWishListOutput {
-  status: number;
-  success: boolean;
-  message: string;
+export interface CreateAndAddWishListOutput extends CommonResponse {
   data: {
     id: number;
     name: string;
@@ -71,3 +70,5 @@ export interface AddWishListOutput {
     name: string;
   };
 }
+
+export interface DeleteWishListById extends CommonResponse {}

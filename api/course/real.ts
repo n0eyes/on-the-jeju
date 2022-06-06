@@ -1,19 +1,26 @@
-import { UseQueryResult } from "react-query";
-import createQuery from "../../utils/createQuery";
 import {
-  useFetchNewWishList,
-  useFetchWishListModal,
-} from "./../../query/wishList/wishListQuery";
-import { WishListModalInput, WishListModalOutput } from "./index";
+  useFetchRecommendedSpot,
+  useFetchWishListById,
+} from "./../../query/recommendation/recommendationQuery";
+import { AxiosInstance } from "axios";
+import { UseMutationResult, UseQueryResult } from "react-query";
+import { RecommendedSpotOutput, WishListByIdOutput } from "./index";
+import withAuth from "../../utils/axios/withAuth";
 
-export const real = {
-  getWishListModal(
-    searchOptions: WishListModalInput
-  ): UseQueryResult<WishListModalOutput> {
-    const query = createQuery(searchOptions);
-    return useFetchWishListModal(query);
-  },
-  createNewWishList() {
-    return useFetchNewWishList();
-  },
+export interface RecommendationAPI {
+  getWishListById: (id: string) => UseQueryResult<WishListByIdOutput>;
+  getRecommendedSpot: () => UseMutationResult<RecommendedSpotOutput>;
+}
+
+export const createRecommendationAPI = (
+  request: AxiosInstance
+): RecommendationAPI => {
+  return {
+    getWishListById: (id: string): UseQueryResult<WishListByIdOutput> =>
+      useFetchWishListById(withAuth(request), id),
+
+    getRecommendedSpot: () => useFetchRecommendedSpot(withAuth(request)),
+  };
 };
+
+export const real = {};

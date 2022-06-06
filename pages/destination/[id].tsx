@@ -16,10 +16,14 @@ import {
   AddWishListInput,
   CreateAndAddWishListInput,
 } from "../../api/wishList";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 function destination() {
   const [isWishOpened, setIsWishOpened] = useState(false);
-  const chartRef = useRef(null);
+  const rankChartRef = useRef(null);
+  const scoreChartRef = useRef(null);
   const router = useRouter();
   let { id } = router.query;
   const { ref, inView } = useInView();
@@ -35,6 +39,15 @@ function destination() {
   const { mutate: createAnddAdd } = api.wishList.fetchCreateAndAddWishList();
   const { mutate: Add } = api.wishList.fetchAddWishList();
   console.log("info :>> ", info);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    adaptiveHeight: true,
+  };
 
   const onWishHandler = () => setIsWishOpened((prev) => !prev);
 
@@ -54,7 +67,7 @@ function destination() {
   };
 
   useEffect(() => {
-    if (chartRef.current && info && meta) {
+    if (rankChartRef.current && scoreChartRef.current && info && meta) {
       const {
         facilityRank,
         facilityScore,
@@ -67,7 +80,7 @@ function destination() {
       } = info.data.scoreDto;
       const labels = meta.categoryDummy.map(({ name }) => name);
       console.log("meta", labels);
-      const chart = {
+      const rankChart = {
         labels,
         datasets: [
           {
@@ -81,6 +94,11 @@ function destination() {
             pointHoverBackgroundColor: "#fff",
             pointHoverBorderColor: "rgb(255, 99, 132)",
           },
+        ],
+      };
+      const scoreChart = {
+        labels,
+        datasets: [
           {
             label: "Score",
             data: [
@@ -100,14 +118,31 @@ function destination() {
         ],
       };
 
-      const myChart = new Chart(chartRef.current, {
+      const myRankChart = new Chart(rankChartRef.current, {
         type: "radar",
-        data: chart,
+        data: rankChart,
         options: {
           responsive: true,
           title: {
             display: true,
-            text: "순위 및 점수",
+            text: "순위",
+          },
+          elements: {
+            line: {
+              borderWidth: 1,
+            },
+          },
+        },
+      });
+
+      const myScoreChart = new Chart(scoreChartRef.current, {
+        type: "radar",
+        data: scoreChart,
+        options: {
+          responsive: true,
+          title: {
+            display: true,
+            text: "점수",
           },
           elements: {
             line: {
@@ -117,7 +152,8 @@ function destination() {
         },
       });
       return () => {
-        myChart.destroy();
+        myRankChart.destroy();
+        myScoreChart.destroy();
       };
     }
   }, [info]);
@@ -180,28 +216,13 @@ function destination() {
         </StyledButtonWrapper>
       </StyledNav>
       <StyledImageWrapper>
-        <StyledThumbnail src="/assets/seoul.webp" />
-        <StyledThumbnail src="/assets/daegu.webp" />
-        <StyledThumbnail src="/assets/incheon.webp" />
-        <StyledThumbnail src="/assets/incheon.webp" />
-        <StyledThumbnail src="/assets/incheon.webp" />
-        <StyledMoreButton>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-            />
-          </svg>
-          사진 더 보기
-        </StyledMoreButton>
+        <Slider {...settings}>
+          {info.data.pictureDto.map(({ id, url }) => (
+            <div key={id}>
+              <img src={url} />
+            </div>
+          ))}
+        </Slider>
       </StyledImageWrapper>
       <StyledMain>
         <StyledInfo>
@@ -209,7 +230,10 @@ function destination() {
           <StyledDesc>{info.data.spotDto.description}</StyledDesc>
         </StyledInfo>
         <div>
-          <canvas id="canvas" ref={chartRef}></canvas>
+          <canvas id="canvas" ref={rankChartRef}></canvas>
+        </div>
+        <div>
+          <canvas id="canvas" ref={scoreChartRef}></canvas>
         </div>
       </StyledMain>
       <StyledReviewViewer>
@@ -242,6 +266,7 @@ const StyledDestination = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
   padding: 2rem 27rem;
   padding-bottom: 10rem;
   @media (max-width: 1300px) {
@@ -294,38 +319,14 @@ const StyledButtonWrapper = styled.div`
 
 const StyledImageWrapper = styled.div`
   width: 100%;
-  position: relative;
-  display: grid;
-  grid-gap: 0.5rem;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  & > img:first-child {
-    grid-column-start: 1;
-    grid-column-end: 3;
-    grid-row-start: 1;
-    grid-row-end: 3;
+  height: 40rem;
+  padding: 0 20rem;
+  margin: 3rem 0;
+
+  & img {
+    width: 100%;
+    height: 40rem;
   }
-`;
-
-const StyledMoreButton = styled.button`
-  position: absolute;
-  background-color: white;
-  border-radius: 0.5rem;
-  padding: 1rem 1.5rem;
-  bottom: 2rem;
-  right: 1rem;
-  border: 1px solid black;
-  display: flex;
-
-  & > svg {
-    width: 1rem;
-    margin-right: 0.5rem;
-  }
-`;
-
-const StyledThumbnail = styled.img`
-  width: 100%;
-  border-radius: 1rem;
 `;
 
 const StyledMain = styled.section`
@@ -352,7 +353,7 @@ const StyledMain = styled.section`
   }
 `;
 const StyledInfo = styled.div`
-  width: 50%;
+  width: 40%;
   display: flex;
   flex-direction: column;
 

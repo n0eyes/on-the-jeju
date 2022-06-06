@@ -1,0 +1,153 @@
+import { darken } from "polished";
+import React from "react";
+import styled from "styled-components";
+import { colors } from "../utils/color";
+
+interface DeleteConfirmModalProps {
+  favoriteName: string;
+  onClick: () => void;
+  onSubmit: () => void;
+}
+
+function DeleteConfirmModal(props: DeleteConfirmModalProps) {
+  const { favoriteName, onClick, onSubmit } = props;
+  return (
+    <StyledBackground onClick={onClick}>
+      <StyledModal>
+        <StyledModalHeader>
+          위시리스트 삭제하기
+          <button onClick={onClick}>X</button>
+        </StyledModalHeader>
+        <StyledModalBody>
+          <div>{favoriteName}(을)를 정말로 삭제하시겠어요?</div>
+          <StyledButtonWrapper>
+            <StyledNewButton onClick={onSubmit}>삭제하기</StyledNewButton>
+          </StyledButtonWrapper>
+        </StyledModalBody>
+      </StyledModal>
+    </StyledBackground>
+  );
+}
+
+export default DeleteConfirmModal;
+
+const StyledBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 999;
+`;
+
+const StyledModal = styled.div`
+  width: 35rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: rgb(0 0 0 / 25%) 0px 4px 16px 0px;
+
+  @keyframes open {
+    from {
+      opacity: 0;
+      transform: translateY(200px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  animation: open 0.5s;
+`;
+
+const StyledModalHeader = styled.div`
+  position: relative;
+  width: 100%;
+  height: 5rem;
+  font-size: 1.5rem;
+  border-bottom: 1px solid lightgrey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & > button {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 1rem;
+    border: none;
+    background-color: transparent;
+  }
+`;
+const StyledModalBody = styled.div`
+  width: 100%;
+  max-height: 30rem;
+  overflow-y: scroll;
+  padding: 1rem 1rem;
+
+  & > div + div {
+    margin-top: 1rem;
+  }
+`;
+const StyledListWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+`;
+const StyledAddButton = styled.button`
+  width: 5rem;
+  height: 5rem;
+  border: 1px solid lightgrey;
+  border-radius: 1rem;
+  background-color: transparent;
+  font-size: 2rem;
+  margin-right: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const StyledAddDesc = styled.div`
+  font-size: 1.2rem;
+`;
+const StyledThumbnail = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 1rem;
+  margin-right: 1rem;
+`;
+const StyledCategoryTitle = styled.div`
+  font-size: 1.2rem;
+`;
+const StyledInput = styled.input`
+  width: 100%;
+  border: 1px solid ${colors.lightgray};
+  border-radius: 0.5rem;
+  outline-color: ${colors.black};
+  padding: 1rem 1rem;
+`;
+const StyledButtonWrapper = styled.div`
+  margin: 5rem -1rem 0 -1rem;
+  padding: 1rem 1rem 0 1rem;
+  border-top: 1px solid ${colors.lightgray};
+`;
+const StyledNewButton = styled.button`
+  width: 100%;
+  border-radius: 0.5rem;
+  border: none;
+  padding: 1rem 0;
+  font-size: 1rem;
+  color: ${colors.white};
+  background-color: ${colors.salmon};
+
+  &:hover {
+    background-color: ${darken(0.03, colors.salmon)};
+  }
+  &:disabled {
+    background-color: ${colors.lightgray};
+  }
+`;

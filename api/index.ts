@@ -1,3 +1,4 @@
+import { createRecommendationAPI, RecommendationAPI } from "./course/real";
 import { createWishListAPI, WishListAPI } from "./wishList/real";
 import { AxiosInstance } from "axios";
 import { AXIOS_KEY } from "../utils/axios/axios";
@@ -10,6 +11,7 @@ export interface APIService {
   travel: TravelAPI;
   destination: DestinationAPI;
   wishList: WishListAPI;
+  recommendation: RecommendationAPI;
 }
 
 type Config = {
@@ -22,16 +24,13 @@ export function createAPIService(config: Config): APIService {
   const travel = createTravelAPI(axiosWithAuth);
   const destination = createDestinationAPI(axiosWithAuth);
   const wishList = createWishListAPI(axiosWithAuth);
-  // const project = createProjectAPIReal(axiosClient);
-  // const userProfile = createUserProfileReal(axiosClient);
+  const recommendation = createRecommendationAPI(axiosWithAuth);
 
   return {
     auth,
     travel,
     destination,
     wishList,
-    // project,
-    // userProfile,
-    // poke,
+    recommendation,
   };
 }

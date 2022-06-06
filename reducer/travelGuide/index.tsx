@@ -35,8 +35,8 @@ interface Action {
 
 export const initialState: State = {
   isWeightOpened: false,
-  locationId: 10,
-  categoryId: 5,
+  locationId: 6,
+  categoryId: 1,
   searchOptions: {
     location: "전체",
     category: "전체",
@@ -114,7 +114,7 @@ export const TravelReducer = (state: State, action: Action) => {
       return produce(state, (draft) => {
         const keys = Object.keys(draft.searchOptions.userWeight);
 
-        if (draft.searchOptions.userWeight[keys[action.payload]] < 5)
+        if (draft.searchOptions.userWeight[keys[action.payload]] < 10)
           draft.searchOptions.userWeight[keys[action.payload]] += 1;
       });
     }

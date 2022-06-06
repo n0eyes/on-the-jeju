@@ -1,8 +1,9 @@
-export interface WishListInfoOutput {
+export interface WishListByIdOutput {
   status: number;
   success: boolean;
   message: string;
-  spotListDtoList: {
+  favoriteName: string;
+  favoriteSpotListDtos: {
     spotId: number;
     spotName: string;
     spotAddress: string;
@@ -11,11 +12,11 @@ export interface WishListInfoOutput {
   }[];
 }
 
-export interface CourseRecommendationInput {
+export interface RecommendedSpotInput {
   spotIdList: number[];
 }
 
-export interface CourseRecommendationOutput {
+export interface RecommendedSpotOutput {
   status: number;
   success: boolean;
   message: string;
