@@ -1,4 +1,5 @@
 import {
+  useFetchSearchTravelSpot,
   useFetchTravelMeta,
   useFetchTravelSpot,
 } from "./../../query/travel/travelQuery";
@@ -10,6 +11,7 @@ import withAuth from "../../utils/axios/withAuth";
 export interface TravelAPI {
   getTravelSpot: () => UseMutationResult<TravelSpotOutput>;
   getTravelMeta: () => UseQueryResult<AxiosResponse<TravelMetaOutput>>;
+  searchTravelSpot: () => UseMutationResult<TravelSpotOutput>;
 }
 
 export const createTravelAPI = (request: AxiosInstance): TravelAPI => {
@@ -19,5 +21,8 @@ export const createTravelAPI = (request: AxiosInstance): TravelAPI => {
 
     getTravelMeta: (): UseQueryResult<AxiosResponse<TravelMetaOutput>> =>
       useFetchTravelMeta(request),
+
+    searchTravelSpot: (): UseMutationResult<TravelSpotOutput> =>
+      useFetchSearchTravelSpot(withAuth(request)),
   };
 };

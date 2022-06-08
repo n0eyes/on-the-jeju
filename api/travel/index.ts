@@ -72,3 +72,7 @@ export interface TravelMetaOutput {
     name: string;
   }[];
 }
+
+export interface SearchTravelSpotInput {
+  spotName: string;
+}

@@ -1,5 +1,6 @@
 import {
   Pagination,
+  SearchTravelSpotInput,
   TravelMetaOutput,
   TravelSearchOptions,
   TravelSpotInput,
@@ -40,3 +41,30 @@ export const useFetchTravelMeta = (request: AxiosInstance) =>
     "meta",
     (): AxiosPromise<TravelMetaOutput> => request("/spotList/metaData")
   );
+
+export const useFetchSearchTravelSpot = (request: AxiosInstance) =>
+  useMutation(
+    ({
+      searchOptions,
+      pagination,
+    }: TravelSearchOptions<
+      SearchTravelSpotInput,
+      Pagination
+    >): Promise<TravelSpotOutput> => {
+      const query = createQuery(pagination);
+      console.log("searchOptions", searchOptions);
+      return fetchSearchTravelSpot(request, query, searchOptions);
+    }
+  );
+
+const fetchSearchTravelSpot = async (
+  request: AxiosInstance,
+  query: string,
+  searchOptions: SearchTravelSpotInput
+) => {
+  const { data } = await request.post(
+    `/user/spotList/search?${query}`,
+    searchOptions
+  );
+  return data;
+};

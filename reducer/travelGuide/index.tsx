@@ -15,6 +15,7 @@ export interface SearchOptions {
 }
 
 interface State {
+  searchKeyword: string;
   isWeightOpened: boolean;
   locationId: number;
   categoryId: number;
@@ -34,6 +35,7 @@ interface Action {
 }
 
 export const initialState: State = {
+  searchKeyword: "",
   isWeightOpened: false,
   locationId: 6,
   categoryId: 1,
@@ -50,9 +52,12 @@ export const initialState: State = {
   spotList: [],
 };
 
+export const INIT_DATA = "INIT_DATA";
 export const UPDATE_DATA = "UPDATE_DATA";
 export const CHANGE_OPTION = "CHANGE_OPTION";
 export const CHANGE_WEIGHT = "CHANGE_WEIGHT";
+export const UPDATE_KEYWORD = "UPDATE_KEYWORD";
+export const CLEAR_KEYWORD = "CLEAR_KEYWORD";
 export const TOGGLE_WEIGHT_MODAL = "TOGGLE_WEIGHT_MODAL";
 export const CLOSE_WEIGHT_MODAL = "CLOSE_WEIGHT_MODAL";
 export const INCREASE_USER_WEIGHT = "INCREASE_USER_WEIGHT";
@@ -60,6 +65,13 @@ export const DECREASE_USER_WEIGHT = "DECREASE_USER_WEIGHT";
 
 export const TravelReducer = (state: State, action: Action) => {
   switch (action.type) {
+    case INIT_DATA: {
+      return {
+        ...state,
+        spotList: [...action.payload.data.content],
+      };
+    }
+
     case UPDATE_DATA: {
       return {
         ...state,
@@ -125,6 +137,18 @@ export const TravelReducer = (state: State, action: Action) => {
 
         if (draft.searchOptions.userWeight[keys[action.payload]] > 0)
           draft.searchOptions.userWeight[keys[action.payload]] -= 1;
+      });
+    }
+
+    case UPDATE_KEYWORD: {
+      return produce(state, (draft) => {
+        draft.searchKeyword = action.payload;
+      });
+    }
+
+    case CLEAR_KEYWORD: {
+      return produce(state, (draft) => {
+        draft.searchKeyword = "";
       });
     }
   }

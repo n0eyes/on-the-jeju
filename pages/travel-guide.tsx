@@ -14,12 +14,18 @@ import {
   UPDATE_DATA,
   SearchOptions,
   CHANGE_WEIGHT,
+  UPDATE_KEYWORD,
+  CLEAR_KEYWORD,
+  INIT_DATA,
 } from "../reducer/travelGuide";
 import { colors } from "../utils/color";
 import useAPI from "../utils/hook/useAPI";
 import { MutateOptions } from "react-query";
+import SearchForm from "../components/SearchForm";
+import { SearchTravelSpotInput } from "../api/travel";
 
 type Tag = "location" | "category";
+type OptionsOrKeyword = SearchOptions | string;
 
 function travelGuide() {
   const [state, dispatch] = useReducer(TravelReducer, initialState);
@@ -32,6 +38,11 @@ function travelGuide() {
     error: spotError,
   } = api.travel.getTravelSpot();
   const { data: meta, error: metaError } = api.travel.getTravelMeta();
+  const {
+    mutate: search,
+    data: searchedData,
+    error: searchError,
+  } = api.travel.searchTravelSpot();
 
   const onModalHandler = () => dispatch({ type: TOGGLE_WEIGHT_MODAL });
   const onModalClose = (e: MouseEvent<HTMLDivElement>) =>
@@ -57,6 +68,7 @@ function travelGuide() {
             type: CHANGE_OPTION,
             payload: { id, method, option, data },
           });
+          dispatch({ type: CLEAR_KEYWORD });
         },
       });
     }
@@ -76,9 +88,17 @@ function travelGuide() {
     }
   };
 
+  const searchTravelSpot = (spotName: string) => {
+    fetchIndex(spotName, {
+      onSuccess: (payload) => {
+        dispatch({ type: INIT_DATA, payload });
+        dispatch({ type: UPDATE_KEYWORD, payload: spotName });
+      },
+    });
+  };
+
   const onSubmitUserWeight = () => {
     if (state && state.searchOptions) {
-      console.log(state.searchOptions);
       fetchIndex(state.searchOptions, {
         onSuccess: (data) => {
           dispatch({
@@ -86,34 +106,61 @@ function travelGuide() {
             payload: { searchOptions: state.searchOptions, data },
           });
           dispatch({ type: CLOSE_WEIGHT_MODAL });
+          dispatch({ type: CLEAR_KEYWORD });
         },
       });
     }
   };
 
   // 리팩터링 포인트
+  //POST > index/next 방식 > 대책 생각..
+
   const fetchIndex = (
-    searchOptions: SearchOptions,
+    searchOptions: OptionsOrKeyword,
     options?: MutateOptions
   ) => {
-    mutate({ searchOptions, pagination: { size: 108, page: 0 } }, options);
+    if (typeof searchOptions === "string") {
+      console.log(searchOptions);
+      search(
+        {
+          searchOptions: { spotName: searchOptions },
+          pagination: { size: 108, page: 0 },
+        },
+        options
+      );
+    } else {
+      mutate({ searchOptions, pagination: { size: 108, page: 0 } }, options);
+    }
   };
 
   const fetchNextPage = (
-    searchOptions: SearchOptions,
+    searchOptions: OptionsOrKeyword,
     options?: MutateOptions
   ) => {
-    let page = 0;
-    if (spotData && !spotData.data.last) {
-      page = spotData.data.pageable.pageNumber + 1;
+    const page =
+      spotData && !spotData.data.last
+        ? spotData.data.pageable.pageNumber + 1
+        : 0;
+
+    if (typeof searchOptions === "string") {
+      search(
+        {
+          searchOptions: { spotName: searchOptions },
+          pagination: { size: 108, page },
+        },
+        options
+      );
+    } else {
+      mutate({ searchOptions, pagination: { size: 108, page } }, options);
     }
-    mutate({ searchOptions, pagination: { size: 108, page } }, options);
   };
 
   useEffect(() => {
     if (state && inView) {
-      const { searchOptions } = state;
-      fetchNextPage(searchOptions, {
+      const { searchOptions, searchKeyword } = state;
+      const options = searchKeyword || searchOptions;
+
+      fetchNextPage(options, {
         onSuccess: (payload) => dispatch({ type: UPDATE_DATA, payload }),
       });
     }
@@ -146,7 +193,10 @@ function travelGuide() {
             </StyledTag>
           ))}
         </StyledTagWrapper>
-        <StyledPriority onClick={onModalHandler}>우선 순위</StyledPriority>
+        <StyledSearchWrapper>
+          <SearchForm search={searchTravelSpot} />
+          <StyledPriority onClick={onModalHandler}>우선 순위</StyledPriority>
+        </StyledSearchWrapper>
       </StyledNav>
       <StyledDestinationWrapper>
         {state.spotList.map(
@@ -238,8 +288,6 @@ const StyledTag = styled.li<{
 `;
 
 const StyledPriority = styled.button`
-  position: absolute;
-  right: 0;
   border: none;
   color: ${colors.white};
   background-color: ${colors.salmon};
@@ -306,4 +354,11 @@ const StyledDescription = styled.div`
   overflow-y: scroll;
   transition: opacity 0.3s;
   line-height: 2rem;
+`;
+
+const StyledSearchWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: 0;
 `;
