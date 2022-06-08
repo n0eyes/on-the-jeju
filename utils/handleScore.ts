@@ -1,4 +1,4 @@
-import { ScoreDto } from "../api/destination";
+import { ScoreDto } from "../fetcher/destination";
 
 export const mappingScore = (score: number) => (score * 5).toFixed(1);
 

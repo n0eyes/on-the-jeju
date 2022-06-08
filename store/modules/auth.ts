@@ -1,6 +1,6 @@
 import { RootState } from "./../index";
 import { createSlice, PayloadAction, Slice } from "@reduxjs/toolkit";
-import { LoginOutput } from "../../api/auth";
+import { LoginOutput } from "../../fetcher/auth";
 
 export interface AuthInfo {
   email: string;

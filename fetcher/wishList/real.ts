@@ -3,7 +3,7 @@ import {
   useFetchCreateAndAddWishList,
   useFetchDeleteWishListById,
   useFetchWishList,
-} from "./../../query/wishList/wishListQuery";
+} from "../../query/wishList/wishListQuery";
 import { AxiosInstance } from "axios";
 import { UseInfiniteQueryResult, UseMutationResult } from "react-query";
 import withAuth from "../../utils/axios/withAuth";

@@ -4,7 +4,7 @@ import {
   LoginOutput,
   RegisterInput,
   RegisterOutput,
-} from "./../../api/auth/index";
+} from "../../fetcher/auth/index";
 import { useMutation } from "react-query";
 
 export const useFetchLogin = (request: AxiosInstance) =>

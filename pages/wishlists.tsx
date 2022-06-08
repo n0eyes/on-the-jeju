@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import wishList from "../api/wishList/api";
+import wishList from "../fetcher/wishList/api";
 import { useInView } from "react-intersection-observer";
 import useAPI from "../utils/hook/useAPI";
 function wishlists() {

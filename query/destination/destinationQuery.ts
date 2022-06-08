@@ -3,7 +3,7 @@ import {
   DestinationInfoOutput,
   DestinationMetaOutput,
   DestinationReviewOutput,
-} from "./../../api/destination/index";
+} from "../../fetcher/destination/index";
 import { useInfiniteQuery, useQuery } from "react-query";
 import createQuery from "../../utils/createQuery";
 

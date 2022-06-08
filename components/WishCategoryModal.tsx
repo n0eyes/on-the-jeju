@@ -2,7 +2,10 @@ import React, { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import styled from "styled-components";
 import { colors } from "../utils/color";
 import { darken } from "polished";
-import { AddWishListInput, CreateAndAddWishListInput } from "../api/wishList";
+import {
+  AddWishListInput,
+  CreateAndAddWishListInput,
+} from "../fetcher/wishList";
 import useAPI from "../utils/hook/useAPI";
 import { useInView } from "react-intersection-observer";
 

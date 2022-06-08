@@ -1,5 +1,5 @@
 import { createContext, ReactNode } from "react";
-import { APIService, createAPIService } from "../../api";
+import { APIService, createAPIService } from "../../fetcher";
 import createAxios from "../axios/axios";
 
 interface APIProviderProps {

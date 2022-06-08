@@ -5,7 +5,7 @@ import {
   CreateAndAddWishListOutput,
   DeleteWishListById,
   WishListOutput,
-} from "./../../api/wishList/index";
+} from "../../fetcher/wishList/index";
 import { AxiosInstance } from "axios";
 import {
   QueryClient,

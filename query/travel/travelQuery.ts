@@ -5,7 +5,7 @@ import {
   TravelSearchOptions,
   TravelSpotInput,
   TravelSpotOutput,
-} from "./../../api/travel/index";
+} from "../../fetcher/travel/index";
 import { AxiosInstance, AxiosPromise } from "axios";
 import { useMutation, useQuery } from "react-query";
 import createQuery from "../../utils/createQuery";

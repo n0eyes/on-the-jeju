@@ -21,7 +21,7 @@ import { colors } from "../utils/color";
 import useAPI from "../utils/hook/useAPI";
 import { MutateOptions } from "react-query";
 import SearchForm from "../components/SearchForm";
-import { TravelSpotOutput } from "../api/travel";
+import { TravelSpotOutput } from "../fetcher/travel";
 
 type Tag = "location" | "category";
 type OptionsOrKeyword = SearchOptions | string;

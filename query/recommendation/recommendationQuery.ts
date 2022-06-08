@@ -2,7 +2,7 @@ import {
   RecommendedSpotInput,
   RecommendedSpotOutput,
   WishListByIdOutput,
-} from "./../../api/course/index";
+} from "../../fetcher/course/index";
 import { AxiosInstance } from "axios";
 import { useMutation, useQuery } from "react-query";
 

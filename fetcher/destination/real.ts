@@ -1,4 +1,4 @@
-import { useFetchDestinationReview } from "./../../query/destination/destinationQuery";
+import { useFetchDestinationReview } from "../../query/destination/destinationQuery";
 import {
   DestinationInfoOutput,
   DestinationMetaOutput,

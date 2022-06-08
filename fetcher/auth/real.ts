@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axios";
 import { LoginOutput, RegisterOutput } from "./index";
 import { UseMutationResult } from "react-query";
-import { useFetchLogin, useFetchRegister } from "./../../query/auth/authQuery";
+import { useFetchLogin, useFetchRegister } from "../../query/auth/authQuery";
 
 export interface AuthAPI {
   login: () => UseMutationResult<LoginOutput>;

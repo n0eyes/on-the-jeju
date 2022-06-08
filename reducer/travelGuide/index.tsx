@@ -1,5 +1,5 @@
 import produce from "immer";
-import { TravelSpotOutput } from "../../api/travel";
+import { TravelSpotOutput } from "../../fetcher/travel";
 
 export interface UserWeight {
   viewWeight: number;

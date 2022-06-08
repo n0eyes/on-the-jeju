@@ -1,7 +1,7 @@
 import {
   useFetchRecommendedSpot,
   useFetchWishListById,
-} from "./../../query/recommendation/recommendationQuery";
+} from "../../query/recommendation/recommendationQuery";
 import { AxiosInstance } from "axios";
 import { UseMutationResult, UseQueryResult } from "react-query";
 import { RecommendedSpotOutput, WishListByIdOutput } from "./index";

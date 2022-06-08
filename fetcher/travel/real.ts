@@ -2,7 +2,7 @@ import {
   useFetchSearchTravelSpot,
   useFetchTravelMeta,
   useFetchTravelSpot,
-} from "./../../query/travel/travelQuery";
+} from "../../query/travel/travelQuery";
 import { TravelMetaOutput, TravelSpotOutput } from "./index";
 import { UseMutationResult, UseQueryResult } from "react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
