@@ -6,6 +6,7 @@ import Head from "next/head";
 import { APIProvider } from "../utils/hook/api";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import Script from "next/script";
 
 function MyApp({ Component, pageProps }) {
   const queryClient = new QueryClient();
