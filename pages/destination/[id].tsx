@@ -20,7 +20,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-function destination() {
+function Destination() {
   const [isWishOpened, setIsWishOpened] = useState(false);
   const rankChartRef = useRef(null);
   const scoreChartRef = useRef(null);
@@ -258,7 +258,7 @@ function destination() {
   );
 }
 
-export default destination;
+export default Destination;
 
 const StyledDestination = styled.div`
   width: 100%;

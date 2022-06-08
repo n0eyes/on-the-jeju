@@ -17,7 +17,7 @@ type SettingCourse = {
   position: string;
   spotAddress: string;
 }[];
-function courseRecommendation() {
+function CourseRecommendation() {
   const router = useRouter();
   const { id } = router.query;
   const mapRef = useRef<naver.maps.Map | undefined>(undefined);
@@ -321,7 +321,7 @@ function courseRecommendation() {
   );
 }
 
-export default courseRecommendation;
+export default CourseRecommendation;
 
 const StyledCourseRecommendation = styled.div`
   width: 100%;

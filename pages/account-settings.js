@@ -1,7 +1,7 @@
 import React from "react";
 
-function accountSettings() {
+function AccountSettings() {
   return <div>account-settings</div>;
 }
 
-export default accountSettings;
+export default AccountSettings;

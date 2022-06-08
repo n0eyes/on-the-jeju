@@ -13,7 +13,7 @@ interface LoginForm {
   pw: string;
 }
 
-function login() {
+function Login() {
   const {
     register,
     handleSubmit,
@@ -70,7 +70,7 @@ function login() {
   );
 }
 
-export default login;
+export default Login;
 
 const StyledLogin = styled.div`
   width: 100%;

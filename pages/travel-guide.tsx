@@ -27,7 +27,7 @@ type Tag = "location" | "category";
 type OptionsOrKeyword = SearchOptions | string;
 
 //리렌더링 최소화를 위해 추후 Dispatch 간소화 or api 메소드 변경 요청
-function travelGuide() {
+function TravelGuide() {
   const [state, dispatch] = useReducer(TravelReducer, initialState);
   const { ref, inView } = useInView();
   const router = useRouter();
@@ -217,7 +217,7 @@ function travelGuide() {
   );
 }
 
-export default travelGuide;
+export default TravelGuide;
 
 const StyledTravelGuide = styled.div`
   width: 100%;

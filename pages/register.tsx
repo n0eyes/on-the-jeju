@@ -13,7 +13,7 @@ interface RegisterForm {
   pwCheck: string;
 }
 
-function register() {
+function Register() {
   const {
     register,
     handleSubmit,
@@ -96,7 +96,7 @@ function register() {
   );
 }
 
-export default register;
+export default Register;
 
 const StyledRegister = styled.div`
   width: 100%;

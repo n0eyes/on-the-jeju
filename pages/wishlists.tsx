@@ -4,7 +4,7 @@ import styled from "styled-components";
 import wishList from "../fetcher/wishList/api";
 import { useInView } from "react-intersection-observer";
 import useAPI from "../utils/hook/useAPI";
-function wishlists() {
+function Wishlists() {
   const { ref, inView } = useInView();
   const api = useAPI();
   const { data, fetchNextPage } = api.wishList.getWishList();
@@ -44,7 +44,7 @@ function wishlists() {
   );
 }
 
-export default wishlists;
+export default Wishlists;
 
 const StyledTravelGuide = styled.div`
   width: 100%;
