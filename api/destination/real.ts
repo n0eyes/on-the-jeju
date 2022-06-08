@@ -38,3 +38,5 @@ export const createDestinationAPI = (
       useFetchDestinationReview(withAuth(request), spotId),
   };
 };
+
+export const real = {};

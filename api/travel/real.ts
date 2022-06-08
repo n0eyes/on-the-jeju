@@ -26,3 +26,5 @@ export const createTravelAPI = (request: AxiosInstance): TravelAPI => {
       useFetchSearchTravelSpot(withAuth(request)),
   };
 };
+
+export const real = {};
