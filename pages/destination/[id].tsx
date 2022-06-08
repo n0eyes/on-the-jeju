@@ -38,7 +38,6 @@ function destination() {
 
   const { mutate: createAnddAdd } = api.wishList.fetchCreateAndAddWishList();
   const { mutate: Add } = api.wishList.fetchAddWishList();
-  console.log("info :>> ", info);
 
   const settings = {
     dots: true,
@@ -79,7 +78,7 @@ function destination() {
         viewScore,
       } = info.data.scoreDto;
       const labels = meta.categoryDummy.map(({ name }) => name);
-      console.log("meta", labels);
+
       const rankChart = {
         labels,
         datasets: [

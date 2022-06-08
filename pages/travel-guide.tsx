@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { MouseEvent, useEffect, useReducer } from "react";
+import React, { MouseEvent, useCallback, useEffect, useReducer } from "react";
 import styled, { css } from "styled-components";
 import UserWeightModal from "../components/UserWeightModal";
 import { useInView } from "react-intersection-observer";
@@ -9,24 +9,24 @@ import {
   CHANGE_OPTION,
   TOGGLE_WEIGHT_MODAL,
   CLOSE_WEIGHT_MODAL,
-  INCREASE_USER_WEIGHT,
-  DECREASE_USER_WEIGHT,
   UPDATE_DATA,
   SearchOptions,
-  CHANGE_WEIGHT,
   UPDATE_KEYWORD,
   CLEAR_KEYWORD,
   INIT_DATA,
+  UserWeight,
+  CLEAR_WEIGHT,
 } from "../reducer/travelGuide";
 import { colors } from "../utils/color";
 import useAPI from "../utils/hook/useAPI";
 import { MutateOptions } from "react-query";
 import SearchForm from "../components/SearchForm";
-import { SearchTravelSpotInput } from "../api/travel";
+import { TravelSpotOutput } from "../api/travel";
 
 type Tag = "location" | "category";
 type OptionsOrKeyword = SearchOptions | string;
 
+//리렌더링 최소화를 위해 추후 Dispatch 간소화 or api 메소드 변경 요청
 function travelGuide() {
   const [state, dispatch] = useReducer(TravelReducer, initialState);
   const { ref, inView } = useInView();
@@ -38,11 +38,8 @@ function travelGuide() {
     error: spotError,
   } = api.travel.getTravelSpot();
   const { data: meta, error: metaError } = api.travel.getTravelMeta();
-  const {
-    mutate: search,
-    data: searchedData,
-    error: searchError,
-  } = api.travel.searchTravelSpot();
+  const { mutate: search } = api.travel.searchTravelSpot();
+  const pagination = { size: 108, page: 0 };
 
   const onModalHandler = () => dispatch({ type: TOGGLE_WEIGHT_MODAL });
   const onModalClose = (e: MouseEvent<HTMLDivElement>) =>
@@ -56,6 +53,7 @@ function travelGuide() {
     } else if (meta && method === "category") {
       option = meta.data.categoryDummy.filter((meta) => meta.id === id)[0].name;
     }
+
     if (state) {
       const searchOptions = {
         ...state.searchOptions,
@@ -74,43 +72,29 @@ function travelGuide() {
     }
   };
 
-  const onClickUserWeight = (method: "+" | "-", i: number) => {
-    if (method === "+") {
-      dispatch({
-        type: INCREASE_USER_WEIGHT,
-        payload: i,
-      });
-    } else if (method === "-") {
-      dispatch({
-        type: DECREASE_USER_WEIGHT,
-        payload: i,
-      });
-    }
-  };
-
-  const searchTravelSpot = (spotName: string) => {
+  const searchTravelSpot = useCallback((spotName: string) => {
     fetchIndex(spotName, {
-      onSuccess: (payload) => {
+      onSuccess: (payload: TravelSpotOutput) => {
         dispatch({ type: INIT_DATA, payload });
         dispatch({ type: UPDATE_KEYWORD, payload: spotName });
       },
     });
-  };
+  }, []);
 
-  const onSubmitUserWeight = () => {
+  const onSubmitUserWeight = useCallback((userWeight: UserWeight) => {
     if (state && state.searchOptions) {
-      fetchIndex(state.searchOptions, {
-        onSuccess: (data) => {
-          dispatch({
-            type: CHANGE_WEIGHT,
-            payload: { searchOptions: state.searchOptions, data },
-          });
-          dispatch({ type: CLOSE_WEIGHT_MODAL });
-          dispatch({ type: CLEAR_KEYWORD });
-        },
-      });
+      fetchIndex(
+        { ...state.searchOptions, userWeight },
+        {
+          onSuccess: (payload: TravelSpotOutput) => {
+            dispatch({ type: INIT_DATA, payload });
+            dispatch({ type: CLOSE_WEIGHT_MODAL });
+            dispatch({ type: CLEAR_WEIGHT });
+          },
+        }
+      );
     }
-  };
+  }, []);
 
   // 리팩터링 포인트
   //POST > index/next 방식 > 대책 생각..
@@ -120,16 +104,15 @@ function travelGuide() {
     options?: MutateOptions
   ) => {
     if (typeof searchOptions === "string") {
-      console.log(searchOptions);
       search(
         {
           searchOptions: { spotName: searchOptions },
-          pagination: { size: 108, page: 0 },
+          pagination,
         },
         options
       );
     } else {
-      mutate({ searchOptions, pagination: { size: 108, page: 0 } }, options);
+      mutate({ searchOptions, pagination }, options);
     }
   };
 
@@ -146,12 +129,12 @@ function travelGuide() {
       search(
         {
           searchOptions: { spotName: searchOptions },
-          pagination: { size: 108, page },
+          pagination: { ...pagination, page },
         },
         options
       );
     } else {
-      mutate({ searchOptions, pagination: { size: 108, page } }, options);
+      mutate({ searchOptions, pagination }, options);
     }
   };
 
@@ -161,7 +144,8 @@ function travelGuide() {
       const options = searchKeyword || searchOptions;
 
       fetchNextPage(options, {
-        onSuccess: (payload) => dispatch({ type: UPDATE_DATA, payload }),
+        onSuccess: (payload: TravelSpotOutput) =>
+          dispatch({ type: UPDATE_DATA, payload }),
       });
     }
   }, [inView]);
@@ -225,9 +209,7 @@ function travelGuide() {
       {state?.isWeightOpened && (
         <UserWeightModal
           meta={meta.data.categoryDummy.slice(1)}
-          weight={state.searchOptions.userWeight}
           onClose={onModalClose}
-          onClick={onClickUserWeight}
           onSubmit={onSubmitUserWeight}
         />
       )}

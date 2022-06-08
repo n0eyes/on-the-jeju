@@ -26,7 +26,6 @@ function WishCategoryModal(props: WishCategoryModal) {
   const { ref, inView } = useInView();
   const api = useAPI();
   const { data, isLoading, fetchNextPage } = api.wishList.getWishList();
-  console.log(data);
   const toggleMode = () => setIsEditing((prev) => !prev);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) =>

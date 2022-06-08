@@ -34,7 +34,7 @@ function SearchForm(props: SearchFormProps) {
           className="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="currentColor"
+          stroke="gray"
           strokeWidth="2"
         >
           <path
@@ -48,7 +48,7 @@ function SearchForm(props: SearchFormProps) {
   );
 }
 
-export default SearchForm;
+export default React.memo(SearchForm);
 
 const StyledSearchForm = styled.form`
   display: flex;

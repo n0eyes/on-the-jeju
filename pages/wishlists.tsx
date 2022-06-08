@@ -9,8 +9,6 @@ function wishlists() {
   const api = useAPI();
   const { data, fetchNextPage } = api.wishList.getWishList();
 
-  console.log(data);
-
   useEffect(() => {
     if (inView) {
       fetchNextPage();

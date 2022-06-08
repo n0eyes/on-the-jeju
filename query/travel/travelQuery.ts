@@ -52,7 +52,6 @@ export const useFetchSearchTravelSpot = (request: AxiosInstance) =>
       Pagination
     >): Promise<TravelSpotOutput> => {
       const query = createQuery(pagination);
-      console.log("searchOptions", searchOptions);
       return fetchSearchTravelSpot(request, query, searchOptions);
     }
   );

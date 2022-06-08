@@ -1,35 +1,59 @@
 import { darken } from "polished";
-import React, { MouseEvent } from "react";
+import React, { FormEvent, MouseEvent, useState } from "react";
 import styled from "styled-components";
 import { UserWeight } from "../reducer/travelGuide";
 import { colors } from "../utils/color";
 
 interface UserWeightModalProps {
-  onSubmit: () => void;
+  onSubmit: (userWeight: UserWeight) => void;
   onClose: (e: MouseEvent<HTMLDivElement>) => void;
-  onClick: (method: "+" | "-", i: number) => void;
   meta: { id: number; name: string }[];
-  weight: UserWeight;
 }
 
 function UserWeightModal(props: UserWeightModalProps) {
-  const { meta, weight, onClose, onClick, onSubmit } = props;
-  const weightList = Object.keys(weight);
+  const { meta, onClose, onSubmit: searchWithUserWeight } = props;
+
+  const [userWeight, setUserWeight] = useState<UserWeight>({
+    viewWeight: 0,
+    priceWeight: 0,
+    facilityWeight: 0,
+    surroundWeight: 0,
+  });
+  const weightList = Object.keys(userWeight);
+
+  const onClickPlus = <K extends keyof UserWeight>(method: K) => {
+    if (userWeight[method] < 3)
+      setUserWeight((prev) => ({ ...prev, [method]: prev[method] + 1 }));
+  };
+
+  const onClickMinus = <K extends keyof UserWeight>(method: K) => {
+    if (userWeight[method] > 0)
+      setUserWeight((prev) => ({ ...prev, [method]: prev[method] - 1 }));
+  };
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    searchWithUserWeight(userWeight);
+  };
 
   return (
     <StyledPriorityBackground onClick={onClose}>
-      <StyledModal>
+      <StyledModal onSubmit={onSubmit}>
         {weightList.map((key, i) => (
           <StyledCategory key={meta[i].id}>
             <div>{meta[i].name}</div>
             <StyledInputWrapper>
-              <StyledButton onClick={() => onClick("-", i)}>-</StyledButton>
-              <div>{weight[key]}</div>
-              <StyledButton onClick={() => onClick("+", i)}>+</StyledButton>
+              <StyledButton type="button" onClick={() => onClickMinus(key)}>
+                -
+              </StyledButton>
+              <div>{userWeight[key]}</div>
+              <StyledButton type="button" onClick={() => onClickPlus(key)}>
+                +
+              </StyledButton>
             </StyledInputWrapper>
           </StyledCategory>
         ))}
-        <StyledConfirm onClick={onSubmit}>설정 완료</StyledConfirm>
+        <StyledConfirm type="submit">설정 완료</StyledConfirm>
       </StyledModal>
     </StyledPriorityBackground>
   );
@@ -50,7 +74,7 @@ const StyledPriorityBackground = styled.div`
   z-index: 999;
 `;
 
-const StyledModal = styled.div`
+const StyledModal = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;

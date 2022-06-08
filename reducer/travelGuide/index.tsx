@@ -55,13 +55,11 @@ export const initialState: State = {
 export const INIT_DATA = "INIT_DATA";
 export const UPDATE_DATA = "UPDATE_DATA";
 export const CHANGE_OPTION = "CHANGE_OPTION";
-export const CHANGE_WEIGHT = "CHANGE_WEIGHT";
 export const UPDATE_KEYWORD = "UPDATE_KEYWORD";
 export const CLEAR_KEYWORD = "CLEAR_KEYWORD";
+export const CLEAR_WEIGHT = "CLEAR_WEIGHT";
 export const TOGGLE_WEIGHT_MODAL = "TOGGLE_WEIGHT_MODAL";
 export const CLOSE_WEIGHT_MODAL = "CLOSE_WEIGHT_MODAL";
-export const INCREASE_USER_WEIGHT = "INCREASE_USER_WEIGHT";
-export const DECREASE_USER_WEIGHT = "DECREASE_USER_WEIGHT";
 
 export const TravelReducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -98,18 +96,6 @@ export const TravelReducer = (state: State, action: Action) => {
       });
     }
 
-    case CHANGE_WEIGHT: {
-      return produce(state, (draft) => {
-        const {
-          searchOptions,
-          data: { data },
-        } = action.payload;
-        console.log(data);
-        draft.searchOptions = searchOptions;
-        draft.spotList = data.content;
-      });
-    }
-
     case TOGGLE_WEIGHT_MODAL: {
       return produce(state, (draft) => {
         draft.isWeightOpened = true;
@@ -122,24 +108,6 @@ export const TravelReducer = (state: State, action: Action) => {
       });
     }
 
-    case INCREASE_USER_WEIGHT: {
-      return produce(state, (draft) => {
-        const keys = Object.keys(draft.searchOptions.userWeight);
-
-        if (draft.searchOptions.userWeight[keys[action.payload]] < 3)
-          draft.searchOptions.userWeight[keys[action.payload]] += 1;
-      });
-    }
-
-    case DECREASE_USER_WEIGHT: {
-      return produce(state, (draft) => {
-        const keys = Object.keys(draft.searchOptions.userWeight);
-
-        if (draft.searchOptions.userWeight[keys[action.payload]] > 0)
-          draft.searchOptions.userWeight[keys[action.payload]] -= 1;
-      });
-    }
-
     case UPDATE_KEYWORD: {
       return produce(state, (draft) => {
         draft.searchKeyword = action.payload;
@@ -149,6 +117,13 @@ export const TravelReducer = (state: State, action: Action) => {
     case CLEAR_KEYWORD: {
       return produce(state, (draft) => {
         draft.searchKeyword = "";
+      });
+    }
+
+    case CLEAR_WEIGHT: {
+      return produce(state, (draft) => {
+        const keys = Object.keys(draft.searchOptions.userWeight);
+        keys.forEach((key) => (draft.searchOptions.userWeight[key] = 0));
       });
     }
   }

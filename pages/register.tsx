@@ -28,9 +28,6 @@ function register() {
     formData: RegisterForm
   ) => {
     const { id, name, pw } = formData;
-    console.log("id,name,pw :>> ", id.includes(" "));
-    console.log("id,name,pw :>> ", name.includes(" "));
-    console.log("id,name,pw :>> ", pw.includes(" "));
     mutation.mutate({ email: id, username: name, password: pw });
   };
 
