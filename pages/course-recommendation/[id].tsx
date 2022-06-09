@@ -46,6 +46,10 @@ function CourseRecommendation() {
     setPaths([]);
   };
   const confirmSetting = async () => {
+    if (settingCourse.length < 2) {
+      alert("출발지와 목적지는 필수 항목입니다.");
+    }
+
     const request = settingCourse.map(({ spotAddress }) =>
       axios(`/api/geocode?query=${spotAddress}`)
     );
